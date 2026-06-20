@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 <header class="main-header">
     <div class="container header-container">
         <div class="logo">
-            <a href="index.php"><h1>Ardhmja</h1></a>
+            <a href="index.php"><h1><?= htmlspecialchars($t_site_title ?? 'Ardhmja') ?></h1></a>
         </div>
         <nav class="main-nav">
             <ul>

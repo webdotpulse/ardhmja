@@ -50,13 +50,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login - Ardhmja</title>
+    <title><?= htmlspecialchars($t_login_page_title) ?> - <?= htmlspecialchars($t_site_title) ?></title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
     <?php include 'includes/header.php'; ?>
     <div class="container main-content">
-        <h2>Login</h2>
+        <h2><?= htmlspecialchars($t_login_page_title) ?></h2>
         <?php if ($error): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
         <form method="POST" action="" class="auth-form">
             <div class="form-group">

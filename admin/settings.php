@@ -5,27 +5,59 @@ require_once 'admin_auth.php';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $site_title = $_POST['site_title'] ?? '';
-    $site_description = $_POST['site_description'] ?? '';
-    $home_banner_text = $_POST['home_banner_text'] ?? '';
+    $columns = [
+        'site_title', 'site_description', 'home_banner_text', 'join_us_btn',
+        'home_core_values_title', 'home_core_values_text', 'view_points_btn',
+        'home_latest_ideas_title', 'view_ideas_btn', 'points_page_title',
+        'points_page_text', 'ideas_page_title', 'ideas_page_text', 'submit_idea_btn',
+        'contact_page_title', 'contact_page_text', 'register_page_title', 'login_page_title', 'footer_text'
+    ];
 
-    $stmt = $pdo->prepare("UPDATE settings SET site_title = ?, site_description = ?, home_banner_text = ? WHERE id = 1");
-    $stmt->execute([$site_title, $site_description, $home_banner_text]);
+    $set_clauses = [];
+    $params = [];
+    foreach ($columns as $col) {
+        $set_clauses[] = "$col = ?";
+        $params[] = $_POST[$col] ?? '';
+    }
+
+    $sql = "UPDATE settings SET " . implode(", ", $set_clauses) . " WHERE id = 1";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
 
     // Check if ID 1 exists, if not insert
     if ($stmt->rowCount() == 0) {
         $stmt = $pdo->prepare("SELECT id FROM settings WHERE id = 1");
         $stmt->execute();
         if (!$stmt->fetch()) {
-             $stmt = $pdo->prepare("INSERT INTO settings (id, site_title, site_description, home_banner_text) VALUES (1, ?, ?, ?)");
-             $stmt->execute([$site_title, $site_description, $home_banner_text]);
+             $placeholders = implode(", ", array_fill(0, count($columns), "?"));
+             $insert_sql = "INSERT INTO settings (id, " . implode(", ", $columns) . ") VALUES (1, $placeholders)";
+             $stmt = $pdo->prepare($insert_sql);
+             $stmt->execute($params);
         }
     }
 
     $success = "Settings updated successfully.";
 }
 
-$settings = $pdo->query("SELECT * FROM settings WHERE id = 1")->fetch() ?: ['site_title'=>'', 'site_description'=>'', 'home_banner_text'=>''];
+// Ensure defaults
+$settings = $pdo->query("SELECT * FROM settings WHERE id = 1")->fetch() ?: [];
+$defaults = [
+    'site_title' => 'Ardhmja', 'site_description' => 'Welcome to our political party platform.',
+    'home_banner_text' => 'Building a New Republic Together', 'join_us_btn' => 'Join Us Now',
+    'home_core_values_title' => 'Our Core Values', 'home_core_values_text' => 'We are dedicated to progress, transparency, and giving power back to the people. Explore our Party Points to understand our vision for Albania.',
+    'view_points_btn' => 'View Party Points', 'home_latest_ideas_title' => 'Latest Community Ideas',
+    'view_ideas_btn' => 'View All Ideas', 'points_page_title' => 'Our Party Points',
+    'points_page_text' => 'Discover our core propositions for building a new future.', 'ideas_page_title' => 'Community Ideas',
+    'ideas_page_text' => 'Explore the ideas submitted by our members and approved by our party admins.', 'submit_idea_btn' => 'Submit an Idea',
+    'contact_page_title' => 'Contact Us', 'contact_page_text' => 'Have questions, ideas, or want to get involved? Please send us a message below.',
+    'register_page_title' => 'Register', 'login_page_title' => 'Login', 'footer_text' => 'All rights reserved.'
+];
+
+foreach ($defaults as $k => $v) {
+    if (!isset($settings[$k]) || $settings[$k] === '') {
+        $settings[$k] = $v;
+    }
+}
 
 ?>
 <!DOCTYPE html>
@@ -37,6 +69,9 @@ $settings = $pdo->query("SELECT * FROM settings WHERE id = 1")->fetch() ?: ['sit
     <style>
         body { display: flex; margin: 0; }
         .admin-content { flex: 1; padding: 20px; }
+        .settings-section { margin-bottom: 30px; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background: #fff;}
+        .settings-section h2 { margin-top: 0; color: var(--primary-color); border-bottom: 2px solid #eee; padding-bottom: 10px;}
+        .settings-form { max-width: 100%; box-shadow: none; padding: 0; background: transparent; }
     </style>
 </head>
 <body>
@@ -46,19 +81,98 @@ $settings = $pdo->query("SELECT * FROM settings WHERE id = 1")->fetch() ?: ['sit
         <?php if ($success): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
 
         <form method="POST" class="settings-form">
-            <div class="form-group">
-                <label>Site Title</label>
-                <input type="text" name="site_title" value="<?= htmlspecialchars($settings['site_title']) ?>" required>
+            <div class="settings-section">
+                <h2>Global Settings</h2>
+                <div class="form-group">
+                    <label>Site Title</label>
+                    <input type="text" name="site_title" value="<?= htmlspecialchars($settings['site_title']) ?>" required>
+                </div>
+                <div class="form-group">
+                    <label>Footer Text</label>
+                    <input type="text" name="footer_text" value="<?= htmlspecialchars($settings['footer_text']) ?>">
+                </div>
             </div>
-            <div class="form-group">
-                <label>Home Banner Text</label>
-                <input type="text" name="home_banner_text" value="<?= htmlspecialchars($settings['home_banner_text']) ?>">
+
+            <div class="settings-section">
+                <h2>Home Page</h2>
+                <div class="form-group">
+                    <label>Home Banner Text</label>
+                    <input type="text" name="home_banner_text" value="<?= htmlspecialchars($settings['home_banner_text']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Site Description (Hero Subtext)</label>
+                    <textarea name="site_description" rows="3"><?= htmlspecialchars($settings['site_description']) ?></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Join Us Button Text</label>
+                    <input type="text" name="join_us_btn" value="<?= htmlspecialchars($settings['join_us_btn']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Core Values Title</label>
+                    <input type="text" name="home_core_values_title" value="<?= htmlspecialchars($settings['home_core_values_title']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Core Values Text</label>
+                    <textarea name="home_core_values_text" rows="3"><?= htmlspecialchars($settings['home_core_values_text']) ?></textarea>
+                </div>
+                <div class="form-group">
+                    <label>View Points Button</label>
+                    <input type="text" name="view_points_btn" value="<?= htmlspecialchars($settings['view_points_btn']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Latest Ideas Title</label>
+                    <input type="text" name="home_latest_ideas_title" value="<?= htmlspecialchars($settings['home_latest_ideas_title']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>View Ideas Button</label>
+                    <input type="text" name="view_ideas_btn" value="<?= htmlspecialchars($settings['view_ideas_btn']) ?>">
+                </div>
             </div>
-            <div class="form-group">
-                <label>Site Description</label>
-                <textarea name="site_description" rows="5"><?= htmlspecialchars($settings['site_description']) ?></textarea>
+
+            <div class="settings-section">
+                <h2>Pages Text</h2>
+                <div class="form-group">
+                    <label>Points Page Title</label>
+                    <input type="text" name="points_page_title" value="<?= htmlspecialchars($settings['points_page_title']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Points Page Description</label>
+                    <textarea name="points_page_text" rows="2"><?= htmlspecialchars($settings['points_page_text']) ?></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Ideas Page Title</label>
+                    <input type="text" name="ideas_page_title" value="<?= htmlspecialchars($settings['ideas_page_title']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Ideas Page Description</label>
+                    <textarea name="ideas_page_text" rows="2"><?= htmlspecialchars($settings['ideas_page_text']) ?></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Submit Idea Button Text</label>
+                    <input type="text" name="submit_idea_btn" value="<?= htmlspecialchars($settings['submit_idea_btn']) ?>">
+                </div>
+
+                <div class="form-group">
+                    <label>Contact Page Title</label>
+                    <input type="text" name="contact_page_title" value="<?= htmlspecialchars($settings['contact_page_title']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Contact Page Description</label>
+                    <textarea name="contact_page_text" rows="2"><?= htmlspecialchars($settings['contact_page_text']) ?></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Register Page Title</label>
+                    <input type="text" name="register_page_title" value="<?= htmlspecialchars($settings['register_page_title']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Login Page Title</label>
+                    <input type="text" name="login_page_title" value="<?= htmlspecialchars($settings['login_page_title']) ?>">
+                </div>
             </div>
-            <button type="submit" class="btn">Save Settings</button>
+
+            <button type="submit" class="btn btn-large" style="width: 100%;">Save Settings</button>
         </form>
     </div>
     <script src="../assets/js/main.js"></script>
