@@ -1,0 +1,51 @@
+<?php
+require_once '../includes/db.php';
+require_once 'admin_auth.php';
+
+// Get counts
+$users_count = $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+$pending_users = $pdo->query("SELECT COUNT(*) FROM users WHERE status = 'pending'")->fetchColumn();
+$ideas_count = $pdo->query("SELECT COUNT(*) FROM ideas")->fetchColumn();
+$pending_ideas = $pdo->query("SELECT COUNT(*) FROM ideas WHERE status = 'pending'")->fetchColumn();
+$points_count = $pdo->query("SELECT COUNT(*) FROM party_points")->fetchColumn();
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body { display: flex; margin: 0; }
+        .admin-content { flex: 1; padding: 20px; }
+        .dashboard-cards { display: flex; gap: 20px; }
+        .card { background: #f4f4f4; padding: 20px; border-radius: 5px; flex: 1; text-align: center; }
+        .card h3 { margin-top: 0; }
+        .card .number { font-size: 2em; font-weight: bold; color: #0033a0; }
+    </style>
+</head>
+<body>
+    <?php include 'admin_sidebar.php'; ?>
+    <div class="admin-content">
+        <h1>Dashboard</h1>
+        <div class="dashboard-cards">
+            <div class="card">
+                <h3>Users</h3>
+                <div class="number"><?= $users_count ?></div>
+                <p><?= $pending_users ?> pending</p>
+            </div>
+            <div class="card">
+                <h3>Ideas</h3>
+                <div class="number"><?= $ideas_count ?></div>
+                <p><?= $pending_ideas ?> pending</p>
+            </div>
+            <div class="card">
+                <h3>Party Points</h3>
+                <div class="number"><?= $points_count ?></div>
+            </div>
+        </div>
+    </div>
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+Installation Manual for Combell Webhosting
+
+1. Upload Files
+   - Log into your Combell control panel and navigate to File Manager, or use an FTP client (like FileZilla).
+   - Upload all the files and folders from this project into your `www` or `public_html` directory on Combell.
+
+2. Setup Database
+   - In the Combell control panel, go to the Databases section and create a new MySQL database.
+   - Note down the database name, username, password, and hostname provided by Combell.
+   - Open phpMyAdmin from the Combell control panel for your new database.
+   - Go to the 'Import' tab and upload the `database.sql` file provided in this project to create the necessary tables and initial admin user.
+
+3. Configure Application
+   - Open `includes/db.php` on the server.
+   - Update the `$host`, `$dbname`, `$username`, and `$password` variables with the details from step 2.
+
+   Example:
+   $host = 'your-combell-db-host'; // Often a specific hostname, not localhost
+   $dbname = 'your_database_name';
+   $username = 'your_database_user';
+   $password = 'your_database_password';
+
+4. Admin Access
+   - You can access the admin panel by navigating to `yourdomain.com/admin/`.
+   - Default login:
+     Username: admin
+     Password: password
+   - Important: Change this password immediately after logging in for the first time by editing the database or adding a change password feature.
+
+5. Directory Permissions
+   - Ensure the folders have standard permissions (usually 755 for directories, 644 for files) so the web server can read them properly. Combell usually handles this by default.
