@@ -3,11 +3,6 @@ session_start();
 require_once 'includes/db.php';
 
 if ($pdo) {
-    $settings = $pdo->query("SELECT * FROM settings WHERE id = 1")->fetch();
-    $site_title = $settings['site_title'] ?? 'Ardhmja';
-    $banner_text = $settings['home_banner_text'] ?? 'Building a New Republic Together';
-    $description = $settings['site_description'] ?? 'Welcome to our political party platform.';
-
     // Get latest public ideas
     $latest_ideas = $pdo->query("
         SELECT i.title, u.username, i.created_at
@@ -18,9 +13,6 @@ if ($pdo) {
         LIMIT 3
     ")->fetchAll();
 } else {
-    $site_title = 'Ardhmja';
-    $banner_text = 'Building a New Republic Together';
-    $description = 'Welcome to our political party platform.';
     $latest_ideas = [];
 }
 
@@ -30,7 +22,11 @@ if ($pdo) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($site_title) ?> - Home</title>
+    <title><?= htmlspecialchars($t_site_title) ?> - Home</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -38,10 +34,10 @@ if ($pdo) {
 
     <div class="hero-banner">
         <div class="container hero-content">
-            <h2><?= htmlspecialchars($banner_text) ?></h2>
-            <p><?= nl2br(htmlspecialchars($description)) ?></p>
+            <h2><?= htmlspecialchars($t_home_banner_text) ?></h2>
+            <p><?= nl2br(htmlspecialchars($t_site_description)) ?></p>
             <?php if (!isset($_SESSION['user_id'])): ?>
-                <a href="register.php" class="btn btn-large btn-primary">Join Us Now</a>
+                <a href="register.php" class="btn btn-large"><?= htmlspecialchars($t_join_us_btn) ?></a>
             <?php endif; ?>
         </div>
     </div>
@@ -49,12 +45,12 @@ if ($pdo) {
     <div class="container main-content">
         <div class="split-section">
             <div class="half-section">
-                <h3>Our Core Values</h3>
-                <p>We are dedicated to progress, transparency, and giving power back to the people. Explore our <a href="points.php">Party Points</a> to understand our vision for Albania.</p>
-                <a href="points.php" class="btn">View Party Points</a>
+                <h3><?= htmlspecialchars($t_home_core_values_title) ?></h3>
+                <p><?= nl2br(htmlspecialchars($t_home_core_values_text)) ?></p>
+                <a href="points.php" class="btn"><?= htmlspecialchars($t_view_points_btn) ?></a>
             </div>
             <div class="half-section">
-                <h3>Latest Community Ideas</h3>
+                <h3><?= htmlspecialchars($t_home_latest_ideas_title) ?></h3>
                 <?php if (empty($latest_ideas)): ?>
                     <p>No ideas published yet.</p>
                 <?php else: ?>
@@ -66,7 +62,7 @@ if ($pdo) {
                             </li>
                         <?php endforeach; ?>
                     </ul>
-                    <a href="ideas.php" class="btn">View All Ideas</a>
+                    <a href="ideas.php" class="btn"><?= htmlspecialchars($t_view_ideas_btn) ?></a>
                 <?php endif; ?>
             </div>
         </div>
@@ -74,7 +70,7 @@ if ($pdo) {
 
     <footer class="main-footer">
         <div class="container">
-            <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($site_title) ?>. All rights reserved.</p>
+            <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($t_site_title) ?>. <?= htmlspecialchars($t_footer_text) ?></p>
         </div>
     </footer>
     <script src="assets/js/main.js"></script>

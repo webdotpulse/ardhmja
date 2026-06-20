@@ -33,14 +33,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Contact Us - Ardhmja</title>
+    <title><?= htmlspecialchars($t_contact_page_title) ?> - <?= htmlspecialchars($t_site_title) ?></title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
     <?php include 'includes/header.php'; ?>
     <div class="container main-content">
-        <h2>Contact Us</h2>
-        <p>Have questions, ideas, or want to get involved? Please send us a message below.</p>
+        <h2><?= htmlspecialchars($t_contact_page_title) ?></h2>
+        <p><?= nl2br(htmlspecialchars($t_contact_page_text)) ?></p>
 
         <?php if ($error): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
         <?php if ($success): ?>
@@ -66,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <footer class="main-footer">
         <div class="container">
-            <p>&copy; <?= date('Y') ?> Ardhmja. All rights reserved.</p>
+            <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($t_site_title) ?>. <?= htmlspecialchars($t_footer_text) ?></p>
         </div>
     </footer>
     <script src="assets/js/main.js"></script>
