@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include 'includes/header.php'; ?>
     <div class="container main-content">
         <h2>Contact Us</h2>
-        <p>Have questions, ideas, or want to get involved? Send us a message below.</p>
+        <p>Have questions, ideas, or want to get involved? Please send us a message below.</p>
 
         <?php if ($error): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
         <?php if ($success): ?>
