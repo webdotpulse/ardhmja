@@ -47,5 +47,14 @@ CREATE TABLE `ideas` (
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 );
 
+CREATE TABLE `messages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `message` text NOT NULL,
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+);
+
 INSERT INTO `settings` (`site_title`, `site_description`, `home_banner_text`) VALUES ('Ardhmja', 'A new Albanian starter party.', 'Join us to build the future');
 INSERT INTO `users` (`username`, `password`, `role`, `status`) VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'approved'); -- password is 'password'

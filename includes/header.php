@@ -13,6 +13,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 <li><a href="index.php">Home</a></li>
                 <li><a href="points.php">Party Points</a></li>
                 <li><a href="ideas.php">Ideas</a></li>
+                <li><a href="contact.php">Contact</a></li>
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <li><a href="profile.php">Profile</a></li>
                     <?php if ($_SESSION['role'] === 'admin'): ?>

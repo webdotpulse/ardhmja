@@ -22,3 +22,7 @@ INSERT INTO `agreements` (`user_id`, `point_id`) VALUES
 (2, 2),
 (3, 1),
 (3, 3);
+
+INSERT INTO `messages` (`name`, `email`, `message`) VALUES
+('Alice Johnson', 'alice@example.com', 'I would love to learn more about volunteering opportunities in Tirana.'),
+('Bob Williams', 'bob@example.com', 'The Green Energy Initiative is exactly what we need. How can I contribute?');
