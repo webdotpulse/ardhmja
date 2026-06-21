@@ -63,6 +63,16 @@ foreach ($defaults as $k => $v) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- TinyMCE -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+      tinymce.init({
+        selector: 'textarea',
+        menubar: false,
+        plugins: 'lists link preview code',
+        toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link code'
+      });
+    </script>
     <meta charset="UTF-8">
     <title>Site Settings</title>
     <link rel="stylesheet" href="../assets/css/style.css">

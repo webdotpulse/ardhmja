@@ -43,7 +43,7 @@ if ($pdo) {
     <?php include 'includes/header.php'; ?>
     <div class="container main-content">
         <h2><?= htmlspecialchars($t_points_page_title) ?></h2>
-        <p><?= nl2br(htmlspecialchars($t_points_page_text)) ?></p>
+        <p><?= $t_points_page_text ?></p>
 
         <?php if (isset($_GET['msg']) && $_GET['msg'] === 'agreed'): ?>
             <p class="success">Thank you for supporting this point!</p>

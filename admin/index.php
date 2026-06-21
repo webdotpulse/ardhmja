@@ -29,6 +29,7 @@ $points_count = $pdo->query("SELECT COUNT(*) FROM party_points")->fetchColumn();
     <?php include 'admin_sidebar.php'; ?>
     <div class="admin-content">
         <h1>Dashboard</h1>
+        <a href="../change_password.php" class="btn btn-sm" style="float: right;">Change Password</a>
         <div class="dashboard-cards">
             <div class="card">
                 <h3>Users</h3>

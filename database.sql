@@ -29,6 +29,8 @@ CREATE TABLE `users` (
   `role` enum('user','admin') DEFAULT 'user',
   `status` enum('pending','approved','rejected') DEFAULT 'pending',
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  `profile_picture` varchar(255) DEFAULT NULL,
+  `is_public` tinyint(1) DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
 );
