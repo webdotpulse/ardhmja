@@ -93,6 +93,7 @@ $ideas = $stmt->fetchAll();
             </tbody>
         </table>
     </div>
+    <?php include "../includes/footer.php"; ?>
     <script src="../assets/js/main.js"></script>
 </body>
 </html>

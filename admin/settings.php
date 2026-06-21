@@ -186,6 +186,7 @@ foreach ($defaults as $k => $v) {
             <button type="submit" class="btn btn-large" style="width: 100%;">Save Settings</button>
         </form>
     </div>
+    <?php include "../includes/footer.php"; ?>
     <script src="../assets/js/main.js"></script>
 </body>
 </html>

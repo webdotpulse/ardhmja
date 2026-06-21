@@ -87,6 +87,7 @@ $points = $pdo->query("SELECT * FROM party_points ORDER BY created_at DESC")->fe
             </tbody>
         </table>
     </div>
+    <?php include "../includes/footer.php"; ?>
     <script src="../assets/js/main.js"></script>
 </body>
 </html>

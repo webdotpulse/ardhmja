@@ -54,6 +54,7 @@ if (isset($_GET['token'])) {
             </div>
         <?php endif; ?>
     </div>
+    <?php include "includes/footer.php"; ?>
     <script src="assets/js/main.js"></script>
 </body>
 </html>

@@ -88,6 +88,7 @@ $agreements = $stmt->fetchAll();
             </div>
         </div>
     </div>
+    <?php include "includes/footer.php"; ?>
     <script src="assets/js/main.js"></script>
 </body>
 </html>

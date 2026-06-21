@@ -78,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
         <p>Don't have an account? <a href="register.php">Register here</a></p>
     </div>
+    <?php include "includes/footer.php"; ?>
     <script src="assets/js/main.js"></script>
 </body>
 </html>

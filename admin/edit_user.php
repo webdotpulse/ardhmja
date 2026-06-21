@@ -112,6 +112,7 @@ if (!$user) {
             <button type="submit" class="btn">Save Changes</button>
         </form>
     </div>
+    <?php include "../includes/footer.php"; ?>
     <script src="../assets/js/main.js"></script>
 </body>
 </html>
