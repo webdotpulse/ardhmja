@@ -76,6 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" class="btn">Change Password</button>
         </form>
     </div>
+    <?php include "includes/footer.php"; ?>
     <script src="assets/js/main.js"></script>
 </body>
 </html>

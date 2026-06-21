@@ -1,16 +1,16 @@
 /* General Styles for Ardhmja */
 :root {
-    --primary-color: #E41E20; /* Vibrant Albanian Red */
-    --secondary-color: #111111; /* Striking Black */
+    --primary-color: #6366f1; /* Indigo/Soft Blue */
+    --secondary-color: #1e293b; /* Slate Dark */
     --accent-color: #FFFFFF; /* Pure White */
-    --text-color: #2b2b2b;
-    --text-light: #555555;
-    --bg-color: #f4f6f8;
+    --text-color: #334155;
+    --text-light: #64748b;
+    --bg-color: #f8fafc;
     --card-bg: #ffffff;
     --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     --heading-font: 'Montserrat', sans-serif;
-    --border-radius: 8px;
-    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --border-radius: 16px;
+    --box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
 }
 
 body {
@@ -112,11 +112,11 @@ a:hover {
 /* Buttons */
 .btn {
     display: inline-block;
-    padding: 12px 24px;
+    padding: 12px 28px;
     background: var(--primary-color);
     color: var(--accent-color) !important;
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: 30px;
     cursor: pointer;
     font-weight: 700;
     font-family: var(--heading-font);
@@ -124,14 +124,14 @@ a:hover {
     font-size: 0.9em;
     letter-spacing: 1px;
     text-align: center;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(228, 30, 32, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
 }
 
 .btn:hover {
-    background: #b31618;
-    box-shadow: 0 6px 12px rgba(228, 30, 32, 0.3);
-    transform: translateY(-2px);
+    background: #4f46e5;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    transform: translateY(-3px);
     text-decoration: none;
 }
 
@@ -167,28 +167,48 @@ a:hover {
 
 /* Hero Banner */
 .hero-banner {
-    background: linear-gradient(135deg, var(--secondary-color) 0%, #2a2a2a 100%);
-    color: var(--accent-color);
+    background: #fdfdfd;
+    color: var(--secondary-color);
     text-align: center;
-    padding: 100px 20px;
+    padding: 120px 20px;
     margin-bottom: 0;
     position: relative;
     overflow: hidden;
 }
 
-/* Subtle double headed eagle motif using CSS geometry for abstraction or a placeholder */
+/* Playful Background Elements */
 .hero-banner::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 400px;
-    height: 400px;
-    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%23E41E20" opacity="0.05"><path d="M50 10 L60 30 L90 30 L70 50 L80 80 L50 60 L20 80 L30 50 L10 30 L40 30 Z"/></svg>') no-repeat center center;
+    top: 10%;
+    left: 10%;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, #fbcfe8 10%, transparent 11%);
+    background-size: 20px 20px;
+    opacity: 0.5;
+    z-index: 0;
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.hero-banner::after {
+    content: '';
+    position: absolute;
+    bottom: 15%;
+    right: 10%;
+    width: 200px;
+    height: 200px;
+    background: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M10,50 Q25,25 50,50 T90,50" fill="none" stroke="%23bae6fd" stroke-width="8" stroke-linecap="round"/></svg>') no-repeat center center;
     background-size: contain;
     z-index: 0;
-    pointer-events: none;
+    animation: float 8s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
 }
 
 .hero-content {
@@ -196,33 +216,18 @@ a:hover {
     z-index: 1;
 }
 
-.hero-content::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('../images/hero-bg.png') no-repeat center center;
-    background-size: cover;
-    opacity: 0.2;
-    z-index: -1;
-    border-radius: var(--border-radius);
-}
-
 .hero-banner h2 {
     font-size: 3.5em;
     margin-top: 0;
-    color: var(--accent-color);
+    color: var(--secondary-color);
     letter-spacing: -1px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .hero-banner p {
     font-size: 1.25em;
     max-width: 800px;
     margin: 0 auto 40px;
-    color: #cccccc;
+    color: var(--text-light);
 }
 
 /* Forms */
@@ -377,12 +382,12 @@ a:hover {
 
 /* Footer */
 .main-footer {
-    background: var(--secondary-color);
-    color: #999;
+    background: #ffffff;
+    color: var(--text-light);
     text-align: center;
-    padding: 30px 0;
+    padding: 40px 0;
     margin-top: 60px;
-    border-top: 4px solid var(--primary-color);
+    border-top: 1px solid #e2e8f0;
 }
 
 .main-footer p {

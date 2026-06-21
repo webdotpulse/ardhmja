@@ -1,0 +1,25 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "A starter website for the Albanian political party \"Ardhmja\", inspired by parti-renaissance.fr.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webdotpulse/ardhmja.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/webdotpulse/ardhmja/issues"
+  },
+  "homepage": "https://github.com/webdotpulse/ardhmja#readme",
+  "dependencies": {
+    "@playwright/test": "^1.61.0",
+    "playwright": "^1.61.0"
+  }
+}

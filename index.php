@@ -69,11 +69,7 @@ if ($pdo) {
         </div>
     </div>
 
-    <footer class="main-footer">
-        <div class="container">
-            <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($t_site_title) ?>. <?= htmlspecialchars($t_footer_text) ?></p>
-        </div>
-    </footer>
+    <?php include "includes/footer.php"; ?>
     <script src="assets/js/main.js"></script>
 </body>
 </html>
