@@ -26,13 +26,17 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `email_verified` tinyint(1) DEFAULT 0,
+  `verify_token` varchar(255) DEFAULT NULL,
   `role` enum('user','admin') DEFAULT 'user',
   `status` enum('pending','approved','rejected') DEFAULT 'pending',
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   `profile_picture` varchar(255) DEFAULT NULL,
   `is_public` tinyint(1) DEFAULT 0,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `username` (`username`)
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
 );
 
 CREATE TABLE `party_points` (
@@ -74,5 +78,5 @@ CREATE TABLE `messages` (
   PRIMARY KEY (`id`)
 );
 
-INSERT INTO `settings` (`site_title`, `site_description`, `home_banner_text`, `join_us_btn`, `home_core_values_title`, `home_core_values_text`, `view_points_btn`, `home_latest_ideas_title`, `view_ideas_btn`, `points_page_title`, `points_page_text`, `ideas_page_title`, `ideas_page_text`, `submit_idea_btn`, `contact_page_title`, `contact_page_text`, `register_page_title`, `login_page_title`, `footer_text`) VALUES ('Ardhmja', 'A new Albanian starter party.', 'Join us to build the future', 'Join Us Now', 'Our Core Values', 'We are dedicated to progress, transparency, and giving power back to the people. Explore our Party Points to understand our vision for Albania.', 'View Party Points', 'Latest Community Ideas', 'View All Ideas', 'Our Party Points', 'Discover our core propositions for building a new future.', 'Community Ideas', 'Explore the ideas submitted by our members and approved by our party admins.', 'Submit an Idea', 'Contact Us', 'Have questions, ideas, or want to get involved? Please send us a message below.', 'Register', 'Login', 'All rights reserved.');
-INSERT INTO `users` (`username`, `password`, `role`, `status`) VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'approved'); -- password is 'password'
+INSERT INTO `settings` (`site_title`, `site_description`, `home_banner_text`, `join_us_btn`, `home_core_values_title`, `home_core_values_text`, `view_points_btn`, `home_latest_ideas_title`, `view_ideas_btn`, `points_page_title`, `points_page_text`, `ideas_page_title`, `ideas_page_text`, `submit_idea_btn`, `contact_page_title`, `contact_page_text`, `register_page_title`, `login_page_title`, `footer_text`) VALUES ('Frymaere', 'A new Albanian starter party.', 'Join us to build the future', 'Join Us Now', 'Our Core Values', 'We are dedicated to progress, transparency, and giving power back to the people. Explore our Party Points to understand our vision for Albania.', 'View Party Points', 'Latest Community Ideas', 'View All Ideas', 'Our Party Points', 'Discover our core propositions for building a new future.', 'Community Ideas', 'Explore the ideas submitted by our members and approved by our party admins.', 'Submit an Idea', 'Contact Us', 'Have questions, ideas, or want to get involved? Please send us a message below.', 'Register', 'Login', 'All rights reserved.');
+INSERT INTO `users` (`username`, `password`, `email`, `email_verified`, `role`, `status`) VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@frymaere.al', 1, 'admin', 'approved'); -- password is 'password'

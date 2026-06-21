@@ -34,6 +34,7 @@ $points = $pdo->query("SELECT * FROM party_points ORDER BY created_at DESC")->fe
         th { background: #f4f4f4; }
         .form-box { background: #f9f9f9; padding: 20px; margin-bottom: 20px; border-radius: 5px; }
     </style>
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
 </head>
 <body>
     <?php include 'admin_sidebar.php'; ?>

@@ -24,7 +24,7 @@ if ($pdo) {
 }
 
 // Fallbacks for editable text properties
-$t_site_title = $global_settings['site_title'] ?? 'Ardhmja';
+$t_site_title = $global_settings['site_title'] ?? 'Frymaere';
 $t_site_description = $global_settings['site_description'] ?? 'Welcome to our political party platform.';
 $t_home_banner_text = $global_settings['home_banner_text'] ?? 'Building a New Republic Together';
 $t_join_us_btn = $global_settings['join_us_btn'] ?? 'Join Us Now';

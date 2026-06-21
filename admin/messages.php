@@ -39,6 +39,7 @@ if ($pdo) {
         th { background: #f4f4f4; }
         .message-content { white-space: pre-wrap; word-break: break-word; }
     </style>
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
 </head>
 <body>
     <?php include 'admin_sidebar.php'; ?>

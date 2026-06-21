@@ -50,6 +50,7 @@ $users = $stmt->fetchAll();
         .tabs a { padding: 10px 20px; text-decoration: none; background: #eee; border-radius: 5px; color: #333;}
         .tabs a.active { background: #0033a0; color: #fff; }
     </style>
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
 </head>
 <body>
     <?php include 'admin_sidebar.php'; ?>

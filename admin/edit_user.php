@@ -78,6 +78,7 @@ if (!$user) {
         .edit-form input[type="file"], .edit-form input[type="checkbox"] { margin-bottom: 15px; }
         .current-picture { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; margin-bottom: 15px; display: block; background: #eee;}
     </style>
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
 </head>
 <body>
     <?php include 'admin_sidebar.php'; ?>
