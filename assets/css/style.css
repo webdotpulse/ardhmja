@@ -1,6 +1,6 @@
 /* General Styles for Ardhmja */
 :root {
-    --primary-color: #6366f1; /* Indigo/Soft Blue */
+    --primary-color: #e41e20; /* Albanian Red */
     --secondary-color: #1e293b; /* Slate Dark */
     --accent-color: #FFFFFF; /* Pure White */
     --text-color: #334155;
@@ -125,12 +125,12 @@ a:hover {
     letter-spacing: 1px;
     text-align: center;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
+    box-shadow: 0 4px 14px 0 rgba(228, 30, 32, 0.39);
 }
 
 .btn:hover {
-    background: #4f46e5;
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    background: #b31618;
+    box-shadow: 0 6px 20px rgba(228, 30, 32, 0.5);
     transform: translateY(-3px);
     text-decoration: none;
 }
@@ -167,7 +167,7 @@ a:hover {
 
 /* Hero Banner */
 .hero-banner {
-    background: #fdfdfd;
+    background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('../images/hero-bg.png') center/cover no-repeat;
     color: var(--secondary-color);
     text-align: center;
     padding: 120px 20px;
