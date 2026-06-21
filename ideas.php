@@ -34,7 +34,7 @@ if ($pdo) {
             <?php endif; ?>
         </div>
 
-        <p><?= nl2br(htmlspecialchars($t_ideas_page_text)) ?></p>
+        <p><?= $t_ideas_page_text ?></p>
 
         <div class="ideas-list">
             <?php foreach ($ideas as $idea): ?>

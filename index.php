@@ -35,7 +35,7 @@ if ($pdo) {
     <div class="hero-banner">
         <div class="container hero-content">
             <h2><?= htmlspecialchars($t_home_banner_text) ?></h2>
-            <p><?= nl2br(htmlspecialchars($t_site_description)) ?></p>
+            <p><?= $t_site_description ?></p>
             <?php if (!isset($_SESSION['user_id'])): ?>
                 <a href="register.php" class="btn btn-large"><?= htmlspecialchars($t_join_us_btn) ?></a>
             <?php endif; ?>
@@ -46,7 +46,7 @@ if ($pdo) {
         <div class="split-section">
             <div class="half-section">
                 <h3><?= htmlspecialchars($t_home_core_values_title) ?></h3>
-                <p><?= nl2br(htmlspecialchars($t_home_core_values_text)) ?></p>
+                <p><?= $t_home_core_values_text ?></p>
                 <a href="points.php" class="btn"><?= htmlspecialchars($t_view_points_btn) ?></a>
             </div>
             <div class="half-section">

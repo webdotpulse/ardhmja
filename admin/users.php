@@ -12,9 +12,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['use
     } elseif ($action === 'delete') {
         $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
         $stmt->execute([$user_id]);
+    } elseif ($action === 'toggle_role') {
+        $stmt = $pdo->prepare("SELECT role FROM users WHERE id = ?");
+        $stmt->execute([$user_id]);
+        $user = $stmt->fetch();
+        if ($user) {
+            $new_role = $user['role'] === 'admin' ? 'user' : 'admin';
+            $update_stmt = $pdo->prepare("UPDATE users SET role = ? WHERE id = ?");
+            $update_stmt->execute([$new_role, $user_id]);
+        }
     }
-    header('Location: users.php');
-    exit;
+
+    // Redirect to preserve the status filter
+    $status_filter = $_GET['status'] ?? 'pending';
+    header('Location: users.php?status=' . urlencode($status_filter));
+    exit();
 }
 
 $status_filter = $_GET['status'] ?? 'pending';
@@ -56,6 +68,8 @@ $users = $stmt->fetchAll();
                     <th>Username</th>
                     <th>Role</th>
                     <th>Date</th>
+                    <th>Public</th>
+                    <th>Picture</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -66,8 +80,10 @@ $users = $stmt->fetchAll();
                     <td><?= htmlspecialchars($u['username']) ?></td>
                     <td><?= $u['role'] ?></td>
                     <td><?= $u['created_at'] ?></td>
+                    <td><?= $u['is_public'] ? 'Yes' : 'No' ?></td>
+                    <td><?= $u['profile_picture'] ? 'Yes' : 'No' ?></td>
                     <td>
-                        <form method="POST" style="display:inline;">
+                        <form method="POST" action="users.php?status=<?= urlencode($status_filter) ?>" style="display:inline;">
                             <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
                             <?php if ($u['status'] !== 'approved'): ?>
                                 <button type="submit" name="action" value="approved" class="btn btn-sm btn-success">Approve</button>
@@ -75,13 +91,15 @@ $users = $stmt->fetchAll();
                             <?php if ($u['status'] !== 'rejected'): ?>
                                 <button type="submit" name="action" value="rejected" class="btn btn-sm btn-warning">Reject</button>
                             <?php endif; ?>
+                            <button type="submit" name="action" value="toggle_role" class="btn btn-sm">Make <?= $u['role'] === 'admin' ? 'User' : 'Admin' ?></button>
+                            <a href="edit_user.php?id=<?= $u['id'] ?>" class="btn btn-sm">Edit</a>
                             <button type="submit" name="action" value="delete" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
                         </form>
                     </td>
                 </tr>
                 <?php endforeach; ?>
                 <?php if(empty($users)): ?>
-                <tr><td colspan="5">No users found.</td></tr>
+                <tr><td colspan="7">No users found.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>

@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include 'includes/header.php'; ?>
     <div class="container main-content">
         <h2><?= htmlspecialchars($t_contact_page_title) ?></h2>
-        <p><?= nl2br(htmlspecialchars($t_contact_page_text)) ?></p>
+        <p><?= $t_contact_page_text ?></p>
 
         <?php if ($error): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
         <?php if ($success): ?>
