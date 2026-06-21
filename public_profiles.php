@@ -51,6 +51,7 @@ $profiles = $stmt->fetchAll();
             font-size: 0.9em;
         }
     </style>
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
 </head>
 <body>
     <?php include 'includes/header.php'; ?>

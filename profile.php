@@ -37,6 +37,7 @@ $agreements = $stmt->fetchAll();
     <meta charset="UTF-8">
     <title>Profile - Ardhmja</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
 </head>
 <body>
     <?php include 'includes/header.php'; ?>

@@ -24,6 +24,7 @@ $points_count = $pdo->query("SELECT COUNT(*) FROM party_points")->fetchColumn();
         .card h3 { margin-top: 0; }
         .card .number { font-size: 2em; font-weight: bold; color: #0033a0; }
     </style>
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
 </head>
 <body>
     <?php include 'admin_sidebar.php'; ?>

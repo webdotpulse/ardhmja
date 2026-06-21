@@ -20,13 +20,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($username) || empty($password)) {
         $error = "Please fill in all fields.";
     } else {
-        $stmt = $pdo->prepare("SELECT id, password, role, status FROM users WHERE username = ?");
+        $stmt = $pdo->prepare("SELECT id, password, role, status, email_verified FROM users WHERE username = ?");
         $stmt->execute([$username]);
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
             if ($user['status'] === 'rejected') {
                 $error = "Your account has been rejected by an admin.";
+            } elseif ($user['email_verified'] == 0) {
+                $error = "Please verify your email address before logging in.";
             } else {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $username;
@@ -56,6 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
 </head>
 <body>
     <?php include 'includes/header.php'; ?>

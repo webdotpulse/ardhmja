@@ -83,6 +83,7 @@ foreach ($defaults as $k => $v) {
         .settings-section h2 { margin-top: 0; color: var(--primary-color); border-bottom: 2px solid #eee; padding-bottom: 10px;}
         .settings-form { max-width: 100%; box-shadow: none; padding: 0; background: transparent; }
     </style>
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
 </head>
 <body>
     <?php include 'admin_sidebar.php'; ?>
