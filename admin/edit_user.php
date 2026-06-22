@@ -31,11 +31,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $allowed_exts = ['jpg', 'jpeg', 'png', 'gif'];
         if (in_array($ext, $allowed_exts)) {
-            $new_filename = uniqid() . '_' . $user_id . '.' . $ext;
-            if (move_uploaded_file($tmp_name, $upload_dir . $new_filename)) {
-                $profile_picture = $new_filename;
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime_type = finfo_file($finfo, $tmp_name);
+            finfo_close($finfo);
+
+            $allowed_mimes = ['image/jpeg', 'image/png', 'image/gif'];
+            if (in_array($mime_type, $allowed_mimes)) {
+                $new_filename = uniqid() . '_' . $user_id . '.' . $ext;
+                if (move_uploaded_file($tmp_name, $upload_dir . $new_filename)) {
+                    $profile_picture = $new_filename;
+                } else {
+                    $error = "Failed to upload image.";
+                }
             } else {
-                $error = "Failed to upload image.";
+                $error = "Invalid file content. Only real JPG, PNG, and GIF images are allowed.";
             }
         } else {
             $error = "Invalid file type. Only JPG, PNG, and GIF are allowed.";
