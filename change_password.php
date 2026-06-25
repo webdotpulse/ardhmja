@@ -18,6 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($current_password) || empty($new_password) || empty($confirm_password)) {
         $error = "Please fill in all fields.";
+    } elseif (strlen($new_password) < 8 || !preg_match('/[A-Z]/', $new_password) || !preg_match('/[a-z]/', $new_password) || !preg_match('/[0-9]/', $new_password)) {
+        $error = "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number.";
     } elseif ($new_password !== $confirm_password) {
         $error = "New passwords do not match.";
     } else {
