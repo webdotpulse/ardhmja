@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif ($user['email_verified'] == 0) {
                 $error = "Please verify your email address before logging in.";
             } else {
+                session_regenerate_id(true);
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $username;
                 $_SESSION['role'] = $user['role'];
