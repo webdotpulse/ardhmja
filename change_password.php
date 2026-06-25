@@ -7,16 +7,23 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 $user_id = $_SESSION['user_id'];
 $success = '';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $current_password = $_POST['current_password'];
-    $new_password = $_POST['new_password'];
-    $confirm_password = $_POST['confirm_password'];
+    $current_password = $_POST['current_password'] ?? '';
+    $new_password = $_POST['new_password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
+    $csrf_token = $_POST['csrf_token'] ?? '';
 
-    if (empty($current_password) || empty($new_password) || empty($confirm_password)) {
+    if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrf_token)) {
+        $error = "Invalid CSRF token.";
+    } elseif (empty($current_password) || empty($new_password) || empty($confirm_password)) {
         $error = "Please fill in all fields.";
     } elseif (strlen($new_password) < 8 || !preg_match('/[A-Z]/', $new_password) || !preg_match('/[a-z]/', $new_password) || !preg_match('/[0-9]/', $new_password)) {
         $error = "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number.";
@@ -63,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if ($success): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
 
         <form method="POST" action="" class="auth-form">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
             <div class="form-group">
                 <label for="current_password">Current Password</label>
                 <input type="password" id="current_password" name="current_password" required>
