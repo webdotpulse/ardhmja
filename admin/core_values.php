@@ -24,6 +24,7 @@ $values = $pdo->query("SELECT * FROM core_values ORDER BY created_at DESC")->fet
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Core Values</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>

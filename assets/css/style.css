@@ -439,3 +439,73 @@ a:hover {
     background: #333;
     color: #fff;
 }
+
+/* Additional Mobile Responsiveness */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 30px 20px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .auth-form, .settings-form {
+        padding: 20px;
+    }
+
+    .hero-banner {
+        padding: 80px 20px;
+    }
+
+    .hero-banner h2 {
+        font-size: 2.5em;
+    }
+
+    .hero-banner p {
+        font-size: 1.1em;
+    }
+
+    .flex-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    /* Admin Area Mobile Responsiveness */
+    .admin-wrapper {
+        flex-direction: column !important;
+    }
+
+    .admin-sidebar {
+        width: 100% !important;
+        height: auto !important;
+        padding: 10px 0;
+    }
+
+    .admin-nav {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .admin-nav li {
+        flex: 1 1 50%;
+        border-bottom: none;
+        border: 1px solid #333;
+        box-sizing: border-box;
+    }
+
+    .admin-nav a {
+        padding: 10px;
+        text-align: center;
+        font-size: 0.9em;
+    }
+
+    .dashboard-cards {
+        flex-direction: column !important;
+    }
+
+    table {
+        display: block !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+    }
+}
