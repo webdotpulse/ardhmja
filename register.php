@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->execute([$username, $hashed_password, $email, $verify_token])) {
 
                 // Send verification email
-                $verify_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/verify.php?token=" . $verify_token;
+                $verify_link = "http://" . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/verify.php?token=" . $verify_token;
                 $subject = "Verify your email for " . $t_site_title;
                 $message = "Hello $username,\n\nPlease click the following link to verify your email address:\n$verify_link\n\nThank you.";
                 $headers = "From: noreply@" . $_SERVER['HTTP_HOST'];
