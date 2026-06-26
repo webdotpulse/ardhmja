@@ -1,5 +1,5 @@
 <div class="admin-sidebar">
-    <h2>Ardhmja Admin</h2>
+    <h2>Admin</h2>
     <ul class="admin-nav">
         <li><a href="index.php">Dashboard</a></li>
         <li><a href="users.php">Manage Users</a></li>

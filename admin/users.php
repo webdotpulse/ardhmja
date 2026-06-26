@@ -41,7 +41,8 @@ $users = $stmt->fetchAll();
     <title>Manage Users</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
-        body { display: flex; margin: 0; }
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
+        .admin-wrapper { display: flex; flex: 1; }
         .admin-content { flex: 1; padding: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
@@ -53,6 +54,7 @@ $users = $stmt->fetchAll();
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
 </head>
 <body>
+    <div class="admin-wrapper">
     <?php include 'admin_sidebar.php'; ?>
     <div class="admin-content">
         <h1>Manage Users</h1>
@@ -104,6 +106,7 @@ $users = $stmt->fetchAll();
                 <?php endif; ?>
             </tbody>
         </table>
+    </div>
     </div>
     <?php include "../includes/footer.php"; ?>
     <script src="../assets/js/main.js"></script>
