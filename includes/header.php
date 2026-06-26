@@ -11,7 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
         <nav class="main-nav">
             <ul>
                 <li><a href="index.php"><?= htmlspecialchars($t_menu_home) ?></a></li>
-                <li><a href="points.php"><?= htmlspecialchars($t_menu_points) ?></a></li>
+                <li><a href="core_values.php"><?= htmlspecialchars($t_menu_values) ?></a></li>
                 <li><a href="ideas.php"><?= htmlspecialchars($t_menu_ideas) ?></a></li>
                 <li><a href="public_profiles.php"><?= htmlspecialchars($t_menu_profiles) ?></a></li>
                 <li><a href="contact.php"><?= htmlspecialchars($t_menu_contact) ?></a></li>

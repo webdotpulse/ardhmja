@@ -6,11 +6,11 @@ CREATE TABLE `settings` (
   `join_us_btn` varchar(255) DEFAULT 'Join Us Now',
   `home_core_values_title` varchar(255) DEFAULT 'Our Core Values',
   `home_core_values_text` text,
-  `view_points_btn` varchar(255) DEFAULT 'View Party Points',
+  `view_values_btn` varchar(255) DEFAULT 'View Core Values',
   `home_latest_ideas_title` varchar(255) DEFAULT 'Latest Community Ideas',
   `view_ideas_btn` varchar(255) DEFAULT 'View All Ideas',
-  `points_page_title` varchar(255) DEFAULT 'Our Party Points',
-  `points_page_text` text,
+  `values_page_title` varchar(255) DEFAULT 'Our Core Values',
+  `values_page_text` text,
   `ideas_page_title` varchar(255) DEFAULT 'Community Ideas',
   `ideas_page_text` text,
   `submit_idea_btn` varchar(255) DEFAULT 'Submit an Idea',
@@ -22,7 +22,7 @@ CREATE TABLE `settings` (
   `email_verification_subject` varchar(255) DEFAULT 'Verify your email for {site_title}',
   `email_verification_message` text,
   `menu_home` varchar(255) DEFAULT 'Home',
-  `menu_points` varchar(255) DEFAULT 'Party Points',
+  `menu_values` varchar(255) DEFAULT 'Core Values',
   `menu_ideas` varchar(255) DEFAULT 'Ideas',
   `menu_profiles` varchar(255) DEFAULT 'Public Profiles',
   `menu_contact` varchar(255) DEFAULT 'Contact',
@@ -51,7 +51,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `email` (`email`)
 );
 
-CREATE TABLE `party_points` (
+CREATE TABLE `core_values` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL,
   `description` text,
@@ -62,12 +62,12 @@ CREATE TABLE `party_points` (
 CREATE TABLE `agreements` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
-  `point_id` int(11) NOT NULL,
+  `value_id` int(11) NOT NULL,
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `user_point` (`user_id`,`point_id`),
+  UNIQUE KEY `user_value` (`user_id`,`value_id`),
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`point_id`) REFERENCES `party_points`(`id`) ON DELETE CASCADE
+  FOREIGN KEY (`value_id`) REFERENCES `core_values`(`id`) ON DELETE CASCADE
 );
 
 CREATE TABLE `ideas` (
@@ -90,10 +90,10 @@ CREATE TABLE `messages` (
   PRIMARY KEY (`id`)
 );
 
-INSERT INTO `settings` (`site_title`, `site_description`, `home_banner_text`, `join_us_btn`, `home_core_values_title`, `home_core_values_text`, `view_points_btn`, `home_latest_ideas_title`, `view_ideas_btn`, `points_page_title`, `points_page_text`, `ideas_page_title`, `ideas_page_text`, `submit_idea_btn`, `contact_page_title`, `contact_page_text`, `register_page_title`, `login_page_title`, `footer_text`, `email_verification_subject`, `email_verification_message`, `menu_home`, `menu_points`, `menu_ideas`, `menu_profiles`, `menu_contact`, `menu_profile`, `menu_admin`, `menu_logout`, `menu_login`, `menu_register`) VALUES ('Frymaere', 'A new Albanian starter party.', 'Join us to build the future', 'Join Us Now', 'Our Core Values', 'We are dedicated to progress, transparency, and giving power back to the people. Explore our Party Points to understand our vision for Albania.', 'View Party Points', 'Latest Community Ideas', 'View All Ideas', 'Our Party Points', 'Discover our core propositions for building a new future.', 'Community Ideas', 'Explore the ideas submitted by our members and approved by our party admins.', 'Submit an Idea', 'Contact Us', 'Have questions, ideas, or want to get involved? Please send us a message below.', 'Register', 'Login', 'All rights reserved.', 'Verify your email for {site_title}', 'Hello {username},
+INSERT INTO `settings` (`site_title`, `site_description`, `home_banner_text`, `join_us_btn`, `home_core_values_title`, `home_core_values_text`, `view_values_btn`, `home_latest_ideas_title`, `view_ideas_btn`, `values_page_title`, `values_page_text`, `ideas_page_title`, `ideas_page_text`, `submit_idea_btn`, `contact_page_title`, `contact_page_text`, `register_page_title`, `login_page_title`, `footer_text`, `email_verification_subject`, `email_verification_message`, `menu_home`, `menu_values`, `menu_ideas`, `menu_profiles`, `menu_contact`, `menu_profile`, `menu_admin`, `menu_logout`, `menu_login`, `menu_register`) VALUES ('Frymaere', 'A new Albanian starter party.', 'Join us to build the future', 'Join Us Now', 'Our Core Values', 'We are dedicated to progress, transparency, and giving power back to the people. Explore our Core Values to understand our vision for Albania.', 'View Core Values', 'Latest Community Ideas', 'View All Ideas', 'Our Core Values', 'Discover our core propositions for building a new future.', 'Community Ideas', 'Explore the ideas submitted by our members and approved by our party admins.', 'Submit an Idea', 'Contact Us', 'Have questions, ideas, or want to get involved? Please send us a message below.', 'Register', 'Login', 'All rights reserved.', 'Verify your email for {site_title}', 'Hello {username},
 
 Please click the following link to verify your email address:
 {verify_link}
 
-Thank you.', 'Home', 'Party Points', 'Ideas', 'Public Profiles', 'Contact', 'Profile', 'Admin Panel', 'Logout', 'Login', 'Register');
+Thank you.', 'Home', 'Core Values', 'Ideas', 'Public Profiles', 'Contact', 'Profile', 'Admin Panel', 'Logout', 'Login', 'Register');
 INSERT INTO `users` (`username`, `password`, `email`, `email_verified`, `role`, `status`) VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@frymaere.al', 1, 'admin', 'approved'); -- password is 'password'

@@ -7,7 +7,8 @@ $users_count = $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $pending_users = $pdo->query("SELECT COUNT(*) FROM users WHERE status = 'pending'")->fetchColumn();
 $ideas_count = $pdo->query("SELECT COUNT(*) FROM ideas")->fetchColumn();
 $pending_ideas = $pdo->query("SELECT COUNT(*) FROM ideas WHERE status = 'pending'")->fetchColumn();
-$points_count = $pdo->query("SELECT COUNT(*) FROM party_points")->fetchColumn();
+$values_count = $pdo->query("SELECT COUNT(*) FROM core_values")->fetchColumn();
+$messages_count = $pdo->query("SELECT COUNT(*) FROM messages")->fetchColumn();
 
 ?>
 <!DOCTYPE html>
@@ -45,8 +46,12 @@ $points_count = $pdo->query("SELECT COUNT(*) FROM party_points")->fetchColumn();
                 <p><?= $pending_ideas ?> pending</p>
             </div>
             <div class="card">
-                <h3>Party Points</h3>
-                <div class="number"><?= $points_count ?></div>
+                <h3>Core Values</h3>
+                <div class="number"><?= $values_count ?></div>
+            </div>
+            <div class="card">
+                <h3>Messages</h3>
+                <div class="number"><?= $messages_count ?></div>
             </div>
         </div>
     </div>

@@ -48,7 +48,7 @@ if ($pdo) {
             <div class="half-section">
                 <h3><?= htmlspecialchars($t_home_core_values_title) ?></h3>
                 <p><?= $t_home_core_values_text ?></p>
-                <a href="points.php" class="btn"><?= htmlspecialchars($t_view_points_btn) ?></a>
+                <a href="core_values.php" class="btn"><?= htmlspecialchars($t_view_values_btn) ?></a>
             </div>
             <div class="half-section">
                 <h3><?= htmlspecialchars($t_home_latest_ideas_title) ?></h3>
