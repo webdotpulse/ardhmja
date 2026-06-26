@@ -43,6 +43,7 @@ $agreements = $stmt->fetchAll();
     <?php include 'includes/header.php'; ?>
     <div class="container main-content">
         <h2>Welcome, <?= htmlspecialchars($_SESSION['username']) ?></h2>
+        <a href="change_username.php" class="btn btn-sm" style="float: right; margin-left: 10px;">Change Username</a>
         <a href="change_password.php" class="btn btn-sm" style="float: right;">Change Password</a>
 
         <div class="status-box <?= $_SESSION['status'] === 'approved' ? 'status-approved' : 'status-pending' ?>">

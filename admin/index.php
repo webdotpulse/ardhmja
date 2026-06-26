@@ -17,7 +17,8 @@ $points_count = $pdo->query("SELECT COUNT(*) FROM party_points")->fetchColumn();
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
-        body { display: flex; margin: 0; }
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
+        .admin-wrapper { display: flex; flex: 1; }
         .admin-content { flex: 1; padding: 20px; }
         .dashboard-cards { display: flex; gap: 20px; }
         .card { background: #f4f4f4; padding: 20px; border-radius: 5px; flex: 1; text-align: center; }
@@ -27,6 +28,7 @@ $points_count = $pdo->query("SELECT COUNT(*) FROM party_points")->fetchColumn();
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
 </head>
 <body>
+    <div class="admin-wrapper">
     <?php include 'admin_sidebar.php'; ?>
     <div class="admin-content">
         <h1>Dashboard</h1>
@@ -47,6 +49,7 @@ $points_count = $pdo->query("SELECT COUNT(*) FROM party_points")->fetchColumn();
                 <div class="number"><?= $points_count ?></div>
             </div>
         </div>
+    </div>
     </div>
     <?php include "../includes/footer.php"; ?>
     <script src="../assets/js/main.js"></script>

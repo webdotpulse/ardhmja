@@ -68,7 +68,7 @@ a:hover {
 .logo h1 {
     margin: 0;
     color: var(--secondary-color);
-    font-size: 2.2em;
+    font-size: 1.4em;
     font-weight: 800;
     letter-spacing: -1px;
     text-transform: uppercase;
@@ -192,7 +192,7 @@ a:hover {
     font-size: 1.25em;
     max-width: 800px;
     margin: 0 auto 40px;
-    color: var(--text-light);
+    color: var(--secondary-color) #1e293b;
 }
 
 /* Forms */
@@ -371,6 +371,7 @@ a:hover {
     text-align: center;
     border-bottom: 1px solid #444;
     padding-bottom: 20px;
+    color: white;
 }
 .admin-nav {
     list-style: none;

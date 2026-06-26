@@ -35,8 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Send verification email
                 $verify_link = "http://" . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/verify.php?token=" . $verify_token;
-                $subject = "Verify your email for " . $t_site_title;
-                $message = "Hello $username,\n\nPlease click the following link to verify your email address:\n$verify_link\n\nThank you.";
+                $subject = str_replace(["{site_title}", "{username}", "{verify_link}"], [$t_site_title, $username, $verify_link], $t_email_verification_subject);
+                $message = str_replace(["{site_title}", "{username}", "{verify_link}"], [$t_site_title, $username, $verify_link], $t_email_verification_message);
                 $headers = "From: noreply@" . $_SERVER['HTTP_HOST'];
 
                 mail($email, $subject, $message, $headers);

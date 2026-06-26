@@ -80,7 +80,8 @@ if (!$user) {
     <title>Edit User</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
-        body { display: flex; margin: 0; }
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
+        .admin-wrapper { display: flex; flex: 1; }
         .admin-content { flex: 1; padding: 20px; }
         .edit-form { max-width: 500px; background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #ddd;}
         .edit-form label { display: block; margin-bottom: 5px; font-weight: bold; }
@@ -90,6 +91,7 @@ if (!$user) {
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
 </head>
 <body>
+    <div class="admin-wrapper">
     <?php include 'admin_sidebar.php'; ?>
     <div class="admin-content">
         <h1>Edit User: <?= htmlspecialchars($user['username']) ?></h1>
@@ -120,6 +122,7 @@ if (!$user) {
 
             <button type="submit" class="btn">Save Changes</button>
         </form>
+    </div>
     </div>
     <?php include "../includes/footer.php"; ?>
     <script src="../assets/js/main.js"></script>

@@ -43,5 +43,7 @@ $t_contact_page_text = $global_settings['contact_page_text'] ?? 'Have questions,
 $t_register_page_title = $global_settings['register_page_title'] ?? 'Register';
 $t_login_page_title = $global_settings['login_page_title'] ?? 'Login';
 $t_footer_text = $global_settings['footer_text'] ?? 'All rights reserved.';
+$t_email_verification_subject = $global_settings['email_verification_subject'] ?? 'Verify your email for {site_title}';
+$t_email_verification_message = $global_settings['email_verification_message'] ?? "Hello {username},\n\nPlease click the following link to verify your email address:\n{verify_link}\n\nThank you.";
 
 ?>

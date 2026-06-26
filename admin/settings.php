@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'home_core_values_title', 'home_core_values_text', 'view_points_btn',
         'home_latest_ideas_title', 'view_ideas_btn', 'points_page_title',
         'points_page_text', 'ideas_page_title', 'ideas_page_text', 'submit_idea_btn',
-        'contact_page_title', 'contact_page_text', 'register_page_title', 'login_page_title', 'footer_text'
+        'contact_page_title', 'contact_page_text', 'register_page_title', 'login_page_title', 'footer_text', 'email_verification_subject', 'email_verification_message'
     ];
 
     $set_clauses = [];
@@ -50,7 +50,12 @@ $defaults = [
     'points_page_text' => 'Discover our core propositions for building a new future.', 'ideas_page_title' => 'Community Ideas',
     'ideas_page_text' => 'Explore the ideas submitted by our members and approved by our party admins.', 'submit_idea_btn' => 'Submit an Idea',
     'contact_page_title' => 'Contact Us', 'contact_page_text' => 'Have questions, ideas, or want to get involved? Please send us a message below.',
-    'register_page_title' => 'Register', 'login_page_title' => 'Login', 'footer_text' => 'All rights reserved.'
+    'register_page_title' => 'Register', 'login_page_title' => 'Login', 'footer_text' => 'All rights reserved.', 'email_verification_subject' => 'Verify your email for {site_title}', 'email_verification_message' => "Hello {username},
+
+Please click the following link to verify your email address:
+{verify_link}
+
+Thank you."
 ];
 
 foreach ($defaults as $k => $v) {
@@ -77,7 +82,8 @@ foreach ($defaults as $k => $v) {
     <title>Site Settings</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
-        body { display: flex; margin: 0; }
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
+        .admin-wrapper { display: flex; flex: 1; }
         .admin-content { flex: 1; padding: 20px; }
         .settings-section { margin-bottom: 30px; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background: #fff;}
         .settings-section h2 { margin-top: 0; color: var(--primary-color); border-bottom: 2px solid #eee; padding-bottom: 10px;}
@@ -86,6 +92,7 @@ foreach ($defaults as $k => $v) {
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
 </head>
 <body>
+    <div class="admin-wrapper">
     <?php include 'admin_sidebar.php'; ?>
     <div class="admin-content">
         <h1>Site Settings</h1>
@@ -184,7 +191,20 @@ foreach ($defaults as $k => $v) {
             </div>
 
             <button type="submit" class="btn btn-large" style="width: 100%;">Save Settings</button>
+            <div class="settings-section">
+                <h2>Email Verification Template</h2>
+                <p><small>Available placeholders: <code>{site_title}</code>, <code>{username}</code>, <code>{verify_link}</code></small></p>
+                <div class="form-group">
+                    <label>Email Subject</label>
+                    <input type="text" name="email_verification_subject" value="<?= htmlspecialchars($settings['email_verification_subject']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Email Message</label>
+                    <textarea name="email_verification_message" rows="5"><?= htmlspecialchars($settings['email_verification_message']) ?></textarea>
+                </div>
+            </div>
         </form>
+    </div>
     </div>
     <?php include "../includes/footer.php"; ?>
     <script src="../assets/js/main.js"></script>
