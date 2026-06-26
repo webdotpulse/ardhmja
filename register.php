@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'includes/db.php';
+require_once 'vendor/autoload.php';
 
 if (isset($_SESSION['user_id'])) {
     header('Location: profile.php');
@@ -37,11 +38,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $verify_link = "http://" . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/verify.php?token=" . $verify_token;
                 $subject = str_replace(["{site_title}", "{username}", "{verify_link}"], [$t_site_title, $username, $verify_link], $t_email_verification_subject);
                 $message = str_replace(["{site_title}", "{username}", "{verify_link}"], [$t_site_title, $username, $verify_link], $t_email_verification_message);
-                $headers = "From: noreply@" . $_SERVER['HTTP_HOST'];
 
-                mail($email, $subject, $message, $headers);
+                $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+                try {
+                    $mail->isSMTP();
+                    $mail->Host       = SMTP_HOST;
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = SMTP_USERNAME;
+                    $mail->Password   = SMTP_PASSWORD;
+                    $mail->SMTPSecure = SMTP_ENCRYPTION;
+                    $mail->Port       = SMTP_PORT;
 
-                $success = "Registration successful! Please check your email to verify your account.";
+                    $mail->setFrom(SMTP_USERNAME, $t_site_title);
+                    $mail->addAddress($email, $username);
+
+                    $mail->isHTML(false);
+                    $mail->Subject = $subject;
+                    $mail->Body    = $message;
+
+                    $mail->send();
+                    $success = "Registration successful! Please check your email to verify your account.";
+                } catch (\PHPMailer\PHPMailer\Exception $e) {
+                    $error = "Registration successful, but the verification email could not be sent. Mailer Error: {$mail->ErrorInfo}";
+                }
             } else {
                 $error = "Something went wrong. Please try again.";
             }

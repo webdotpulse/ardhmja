@@ -57,4 +57,11 @@ $t_menu_logout = $global_settings['menu_logout'] ?? 'Logout';
 $t_menu_login = $global_settings['menu_login'] ?? 'Login';
 $t_menu_register = $global_settings['menu_register'] ?? 'Register';
 
+
+// SMTP Configuration
+if (!defined('SMTP_HOST')) define('SMTP_HOST', getenv('SMTP_HOST') ?: 'smtp-auth.mailprotect.be');
+if (!defined('SMTP_USERNAME')) define('SMTP_USERNAME', getenv('SMTP_USERNAME') ?: 'noreply@mobilitypulse.com');
+if (!defined('SMTP_PASSWORD')) define('SMTP_PASSWORD', getenv('SMTP_PASSWORD') ?: '');
+if (!defined('SMTP_PORT')) define('SMTP_PORT', getenv('SMTP_PORT') ?: 2525);
+if (!defined('SMTP_ENCRYPTION')) define('SMTP_ENCRYPTION', getenv('SMTP_ENCRYPTION') ?: 'tls'); // Or 'ssl'
 ?>
