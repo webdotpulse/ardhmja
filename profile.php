@@ -24,7 +24,7 @@ $ideas = $stmt->fetchAll();
 $stmt = $pdo->prepare("
     SELECT pp.title
     FROM agreements a
-    JOIN party_points pp ON a.point_id = pp.id
+    JOIN core_values pp ON a.value_id = pp.id
     WHERE a.user_id = ?
 ");
 $stmt->execute([$user_id]);
@@ -49,7 +49,7 @@ $agreements = $stmt->fetchAll();
         <div class="status-box <?= $_SESSION['status'] === 'approved' ? 'status-approved' : 'status-pending' ?>">
             Account Status: <strong><?= ucfirst(htmlspecialchars($_SESSION['status'])) ?></strong>
             <?php if ($_SESSION['status'] === 'pending'): ?>
-                <p>Your account is waiting for admin approval. Once approved, you can submit ideas and agree to party points.</p>
+                <p>Your account is waiting for admin approval. Once approved, you can submit ideas and agree to Core Values.</p>
             <?php endif; ?>
         </div>
 
@@ -76,9 +76,9 @@ $agreements = $stmt->fetchAll();
             </div>
 
             <div class="section">
-                <h3>Party Points I Agree With</h3>
+                <h3>Core Values I Agree With</h3>
                 <?php if (empty($agreements)): ?>
-                    <p>You haven't agreed to any party points yet. <a href="points.php">View points</a></p>
+                    <p>You haven't agreed to any Core Values yet. <a href="core_values.php">View core values</a></p>
                 <?php else: ?>
                     <ul class="agreement-list">
                         <?php foreach ($agreements as $agreement): ?>

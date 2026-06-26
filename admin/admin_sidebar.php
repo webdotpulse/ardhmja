@@ -4,7 +4,7 @@
         <li><a href="index.php">Dashboard</a></li>
         <li><a href="users.php">Manage Users</a></li>
         <li><a href="ideas.php">Manage Ideas</a></li>
-        <li><a href="points.php">Party Points</a></li>
+        <li><a href="core_values.php">Core Values</a></li>
         <li><a href="messages.php">Messages</a></li>
         <li><a href="settings.php">Site Settings</a></li>
         <li><a href="../index.php">View Site</a></li>

@@ -7,24 +7,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $title = trim($_POST['title']);
         $description = trim($_POST['description']);
         if (!empty($title)) {
-            $stmt = $pdo->prepare("INSERT INTO party_points (title, description) VALUES (?, ?)");
+            $stmt = $pdo->prepare("INSERT INTO core_values (title, description) VALUES (?, ?)");
             $stmt->execute([$title, $description]);
         }
-    } elseif (isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['point_id'])) {
-        $stmt = $pdo->prepare("DELETE FROM party_points WHERE id = ?");
-        $stmt->execute([$_POST['point_id']]);
+    } elseif (isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['value_id'])) {
+        $stmt = $pdo->prepare("DELETE FROM core_values WHERE id = ?");
+        $stmt->execute([$_POST['value_id']]);
     }
-    header('Location: points.php');
+    header('Location: core_values.php');
     exit;
 }
 
-$points = $pdo->query("SELECT * FROM party_points ORDER BY created_at DESC")->fetchAll();
+$values = $pdo->query("SELECT * FROM core_values ORDER BY created_at DESC")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Party Points</title>
+    <title>Core Values</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
@@ -41,10 +41,10 @@ $points = $pdo->query("SELECT * FROM party_points ORDER BY created_at DESC")->fe
     <div class="admin-wrapper">
     <?php include 'admin_sidebar.php'; ?>
     <div class="admin-content">
-        <h1>Party Points</h1>
+        <h1>Core Values</h1>
 
         <div class="form-box">
-            <h3>Add New Point</h3>
+            <h3>Add New Value</h3>
             <form method="POST">
                 <input type="hidden" name="action" value="add">
                 <div class="form-group">
@@ -55,7 +55,7 @@ $points = $pdo->query("SELECT * FROM party_points ORDER BY created_at DESC")->fe
                     <label>Description</label>
                     <textarea name="description" rows="3"></textarea>
                 </div>
-                <button type="submit" class="btn">Add Point</button>
+                <button type="submit" class="btn">Add Value</button>
             </form>
         </div>
 
@@ -69,22 +69,23 @@ $points = $pdo->query("SELECT * FROM party_points ORDER BY created_at DESC")->fe
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($points as $p): ?>
+                <?php foreach ($values as $v): ?>
                 <tr>
-                    <td><?= htmlspecialchars($p['title']) ?></td>
-                    <td><?= nl2br(htmlspecialchars($p['description'])) ?></td>
-                    <td><?= $p['created_at'] ?></td>
+                    <td><?= htmlspecialchars($v['title']) ?></td>
+                    <td><?= nl2br(htmlspecialchars($v['description'])) ?></td>
+                    <td><?= $v['created_at'] ?></td>
                     <td>
                         <form method="POST" style="display:inline;">
                             <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="point_id" value="<?= $p['id'] ?>">
+                            <input type="hidden" name="value_id" value="<?= $v['id'] ?>">
+                            <a href="edit_value.php?id=<?= $v['id'] ?>" class="btn btn-sm">Edit</a>
                             <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
                         </form>
                     </td>
                 </tr>
                 <?php endforeach; ?>
-                <?php if(empty($points)): ?>
-                <tr><td colspan="4">No party points defined.</td></tr>
+                <?php if(empty($values)): ?>
+                <tr><td colspan="4">No Core Values defined.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
