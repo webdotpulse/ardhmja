@@ -46,4 +46,15 @@ $t_footer_text = $global_settings['footer_text'] ?? 'All rights reserved.';
 $t_email_verification_subject = $global_settings['email_verification_subject'] ?? 'Verify your email for {site_title}';
 $t_email_verification_message = $global_settings['email_verification_message'] ?? "Hello {username},\n\nPlease click the following link to verify your email address:\n{verify_link}\n\nThank you.";
 
+$t_menu_home = $global_settings['menu_home'] ?? 'Home';
+$t_menu_points = $global_settings['menu_points'] ?? 'Party Points';
+$t_menu_ideas = $global_settings['menu_ideas'] ?? 'Ideas';
+$t_menu_profiles = $global_settings['menu_profiles'] ?? 'Public Profiles';
+$t_menu_contact = $global_settings['menu_contact'] ?? 'Contact';
+$t_menu_profile = $global_settings['menu_profile'] ?? 'Profile';
+$t_menu_admin = $global_settings['menu_admin'] ?? 'Admin Panel';
+$t_menu_logout = $global_settings['menu_logout'] ?? 'Logout';
+$t_menu_login = $global_settings['menu_login'] ?? 'Login';
+$t_menu_register = $global_settings['menu_register'] ?? 'Register';
+
 ?>

@@ -10,7 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'home_core_values_title', 'home_core_values_text', 'view_points_btn',
         'home_latest_ideas_title', 'view_ideas_btn', 'points_page_title',
         'points_page_text', 'ideas_page_title', 'ideas_page_text', 'submit_idea_btn',
-        'contact_page_title', 'contact_page_text', 'register_page_title', 'login_page_title', 'footer_text', 'email_verification_subject', 'email_verification_message'
+        'contact_page_title', 'contact_page_text', 'register_page_title', 'login_page_title', 'footer_text', 'email_verification_subject', 'email_verification_message',
+        'menu_home', 'menu_points', 'menu_ideas', 'menu_profiles', 'menu_contact', 'menu_profile', 'menu_admin', 'menu_logout', 'menu_login', 'menu_register'
     ];
 
     $set_clauses = [];
@@ -55,7 +56,10 @@ $defaults = [
 Please click the following link to verify your email address:
 {verify_link}
 
-Thank you."
+Thank you.",
+    'menu_home' => 'Home', 'menu_points' => 'Party Points', 'menu_ideas' => 'Ideas',
+    'menu_profiles' => 'Public Profiles', 'menu_contact' => 'Contact', 'menu_profile' => 'Profile',
+    'menu_admin' => 'Admin Panel', 'menu_logout' => 'Logout', 'menu_login' => 'Login', 'menu_register' => 'Register'
 ];
 
 foreach ($defaults as $k => $v) {
@@ -99,6 +103,50 @@ foreach ($defaults as $k => $v) {
         <?php if ($success): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
 
         <form method="POST" class="settings-form">
+            <div class="settings-section">
+                <h2>Navigation Menu</h2>
+                <div class="form-group">
+                    <label>Home</label>
+                    <input type="text" name="menu_home" value="<?= htmlspecialchars($settings['menu_home']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Party Points</label>
+                    <input type="text" name="menu_points" value="<?= htmlspecialchars($settings['menu_points']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Ideas</label>
+                    <input type="text" name="menu_ideas" value="<?= htmlspecialchars($settings['menu_ideas']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Public Profiles</label>
+                    <input type="text" name="menu_profiles" value="<?= htmlspecialchars($settings['menu_profiles']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Contact</label>
+                    <input type="text" name="menu_contact" value="<?= htmlspecialchars($settings['menu_contact']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Profile (Logged In)</label>
+                    <input type="text" name="menu_profile" value="<?= htmlspecialchars($settings['menu_profile']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Admin Panel (Admin Only)</label>
+                    <input type="text" name="menu_admin" value="<?= htmlspecialchars($settings['menu_admin']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Logout</label>
+                    <input type="text" name="menu_logout" value="<?= htmlspecialchars($settings['menu_logout']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Login (Logged Out)</label>
+                    <input type="text" name="menu_login" value="<?= htmlspecialchars($settings['menu_login']) ?>">
+                </div>
+                <div class="form-group">
+                    <label>Register (Logged Out)</label>
+                    <input type="text" name="menu_register" value="<?= htmlspecialchars($settings['menu_register']) ?>">
+                </div>
+            </div>
+
             <div class="settings-section">
                 <h2>Global Settings</h2>
                 <div class="form-group">
