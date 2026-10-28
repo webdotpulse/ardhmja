@@ -189,6 +189,6 @@ $page_title = 'Manage Users - ' . $t_site_title;
         </main>
     </div>
     <?php include __DIR__ . '/../includes/footer.php'; ?>
-    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="../assets/js/main.js"></script>
+    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="<?= htmlspecialchars(asset_url('assets/js/main.js', '../'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>

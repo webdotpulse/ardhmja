@@ -22,7 +22,7 @@ if (!defined('DB_NAME')) {
 
 // SMTP Configuration
 if (!defined('SMTP_HOST')) define('SMTP_HOST', getenv('SMTP_HOST') ?: 'smtp-auth.mailprotect.be');
-if (!defined('SMTP_USERNAME')) define('SMTP_USERNAME', getenv('SMTP_USERNAME') ?: 'noreply@asamblejakombetare.al');
+if (!defined('SMTP_USERNAME')) define('SMTP_USERNAME', getenv('SMTP_USERNAME') ?: 'info@asamblejakombetare.com');
 if (!defined('SMTP_PASSWORD')) define('SMTP_PASSWORD', getenv('SMTP_PASSWORD') ?: '');
 if (!defined('SMTP_PORT')) define('SMTP_PORT', (int)(getenv('SMTP_PORT') ?: 587));
 if (!defined('SMTP_ENCRYPTION')) define('SMTP_ENCRYPTION', getenv('SMTP_ENCRYPTION') ?: 'tls');
@@ -69,6 +69,7 @@ if ($pdo instanceof PDO) {
         error_log('Database bootstrap query failed: ' . $e->getMessage());
     }
 }
+sync_browser_theme_cache($global_settings);
 
 // Helper to resolve localized setting with graceful fallback to existing content
 function setting_localized(string $key, array $settings, array $en_defaults, array $sq_defaults, string $lang): string {
@@ -164,7 +165,7 @@ function require_db(?PDO $pdo, string $asset_prefix = ''): void {
             <p class="info-box"><?= htmlspecialchars(__('db_unavailable_text'), ENT_QUOTES, 'UTF-8') ?></p>
         </main>
         <?php include __DIR__ . '/footer.php'; ?>
-        <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="<?= htmlspecialchars($asset_prefix, ENT_QUOTES, 'UTF-8') ?>assets/js/main.js"></script>
+        <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="<?= htmlspecialchars(asset_url('assets/js/main.js', $asset_prefix), ENT_QUOTES, 'UTF-8') ?>"></script>
     </body>
     </html>
     <?php

@@ -12,7 +12,7 @@ if (mb_strlen($clean_desc, 'UTF-8') > 160) {
 }
 $base_url = app_base_url();
 $og_locale = (current_lang() === 'sq') ? 'sq_AL' : 'en_US';
-$og_image = $base_url . '/assets/images/og-image.jpg';
+$og_image = $base_url . '/' . asset_url('assets/images/og-image.jpg');
 ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,6 +31,6 @@ $og_image = $base_url . '/assets/images/og-image.jpg';
     <meta name="twitter:title" content="<?= htmlspecialchars($resolved_title, ENT_QUOTES, 'UTF-8') ?>">
     <meta name="twitter:description" content="<?= htmlspecialchars($clean_desc, ENT_QUOTES, 'UTF-8') ?>">
     <meta name="twitter:image" content="<?= htmlspecialchars($og_image, ENT_QUOTES, 'UTF-8') ?>">
-    <link rel="stylesheet" href="<?= htmlspecialchars($head_prefix, ENT_QUOTES, 'UTF-8') ?>assets/css/style.css">
-    <link rel="icon" type="image/png" href="<?= htmlspecialchars($head_prefix, ENT_QUOTES, 'UTF-8') ?>assets/images/favicon.png">
-    <link rel="icon" type="image/x-icon" href="<?= htmlspecialchars($head_prefix, ENT_QUOTES, 'UTF-8') ?>assets/images/favicon.ico">
+    <link rel="stylesheet" href="<?= htmlspecialchars(asset_url('assets/css/style.css', $head_prefix), ENT_QUOTES, 'UTF-8') ?>">
+    <link rel="icon" type="image/png" href="<?= htmlspecialchars(asset_url('assets/images/favicon.png', $head_prefix), ENT_QUOTES, 'UTF-8') ?>">
+    <link rel="icon" type="image/x-icon" href="<?= htmlspecialchars(asset_url('assets/images/favicon.ico', $head_prefix), ENT_QUOTES, 'UTF-8') ?>">

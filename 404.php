@@ -19,6 +19,6 @@ $robots_meta = 'noindex';
         <p style="margin-top: 24px;"><a href="index.php" class="btn"><?= htmlspecialchars(__('back_home_btn'), ENT_QUOTES, 'UTF-8') ?></a></p>
     </main>
     <?php include __DIR__ . '/includes/footer.php'; ?>
-    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="assets/js/main.js"></script>
+    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="<?= htmlspecialchars(asset_url('assets/js/main.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>

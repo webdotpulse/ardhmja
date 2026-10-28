@@ -1,18 +1,19 @@
 -- Fresh database schema for AsamblejaKombetare (for NEW installations only).
 -- IMPORTANT: If you ALREADY have an existing database with registered users and content,
--- DO NOT import this file! Either let the website auto-upgrade on first page load,
--- or import `upgrade.sql` in phpMyAdmin, which preserves 100% of existing data.
+-- DO NOT import this file! Import `upgrade.sql` instead (or let PHP auto-migrate),
+-- which preserves 100% of existing users, agreements, ideas, and messages.
 
 SET NAMES utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `settings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `schema_version` int(11) NOT NULL DEFAULT 2,
+  `schema_version` int(11) NOT NULL DEFAULT 3,
+  `cache_version` int(11) NOT NULL DEFAULT 2,
   `site_title` varchar(255) NOT NULL DEFAULT 'AsamblejaKombetare',
   `site_description` text,
   `site_description_sq` text,
-  `home_banner_text` varchar(255) DEFAULT 'Building Our National Future Together',
-  `home_banner_text_sq` varchar(255) DEFAULT 'Ndërtojmë të Ardhmen Tonë Kombëtare Së Bashku',
+  `home_banner_text` varchar(255) DEFAULT 'Join Us for a European Albania',
+  `home_banner_text_sq` varchar(255) DEFAULT 'Bashkohuni me ne për një Shqipëri Europiane',
   `join_us_btn` varchar(255) DEFAULT 'Join Us Now',
   `join_us_btn_sq` varchar(255) DEFAULT 'Bashkohuni Tani',
   `home_core_values_title` varchar(255) DEFAULT 'Our Core Values',
@@ -42,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `settings` (
   `register_page_title` varchar(255) DEFAULT 'Register',
   `register_page_title_sq` varchar(255) DEFAULT 'Regjistrohu',
   `login_page_title` varchar(255) DEFAULT 'Login',
-  `login_page_title_sq` varchar(255) DEFAULT 'Hyrje',
+  `login_page_title_sq` varchar(255) DEFAULT 'Hyr',
   `footer_text` varchar(255) DEFAULT 'All rights reserved.',
   `footer_text_sq` varchar(255) DEFAULT 'Të gjitha të drejtat e rezervuara.',
   `email_verification_subject` varchar(255) DEFAULT 'Verify your email for {site_title}',
@@ -50,19 +51,19 @@ CREATE TABLE IF NOT EXISTS `settings` (
   `email_verification_message` text,
   `email_verification_message_sq` text,
   `menu_home` varchar(255) DEFAULT 'Home',
-  `menu_home_sq` varchar(255) DEFAULT 'Ballina',
+  `menu_home_sq` varchar(255) DEFAULT 'Kreu',
   `menu_values` varchar(255) DEFAULT 'Core Values',
   `menu_values_sq` varchar(255) DEFAULT 'Vlerat Themelore',
   `menu_ideas` varchar(255) DEFAULT 'Ideas',
   `menu_ideas_sq` varchar(255) DEFAULT 'Idetë',
   `menu_profiles` varchar(255) DEFAULT 'Public Profiles',
-  `menu_profiles_sq` varchar(255) DEFAULT 'Profilet Publike',
+  `menu_profiles_sq` varchar(255) DEFAULT 'Profilet',
   `menu_contact` varchar(255) DEFAULT 'Contact',
   `menu_contact_sq` varchar(255) DEFAULT 'Kontakt',
   `menu_profile` varchar(255) DEFAULT 'Profile',
   `menu_profile_sq` varchar(255) DEFAULT 'Profili',
   `menu_admin` varchar(255) DEFAULT 'Admin Panel',
-  `menu_admin_sq` varchar(255) DEFAULT 'Administrimi',
+  `menu_admin_sq` varchar(255) DEFAULT 'Admin',
   `menu_logout` varchar(255) DEFAULT 'Logout',
   `menu_logout_sq` varchar(255) DEFAULT 'Dil',
   `menu_login` varchar(255) DEFAULT 'Login',
@@ -70,7 +71,7 @@ CREATE TABLE IF NOT EXISTS `settings` (
   `menu_register` varchar(255) DEFAULT 'Register',
   `menu_register_sq` varchar(255) DEFAULT 'Regjistrohu',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -96,7 +97,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `core_values` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -106,7 +107,7 @@ CREATE TABLE IF NOT EXISTS `core_values` (
   `description_sq` text,
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `agreements` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -117,7 +118,7 @@ CREATE TABLE IF NOT EXISTS `agreements` (
   UNIQUE KEY `user_value` (`user_id`,`value_id`),
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
   FOREIGN KEY (`value_id`) REFERENCES `core_values`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `ideas` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -128,7 +129,7 @@ CREATE TABLE IF NOT EXISTS `ideas` (
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `messages` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -137,7 +138,7 @@ CREATE TABLE IF NOT EXISTS `messages` (
   `message` text NOT NULL,
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `rate_limits` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -146,10 +147,10 @@ CREATE TABLE IF NOT EXISTS `rate_limits` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_action_ip_time` (`action`, `ip_hash`, `created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT IGNORE INTO `settings` (
-  `id`, `schema_version`, `site_title`,
+  `id`, `schema_version`, `cache_version`, `site_title`,
   `site_description`, `site_description_sq`,
   `home_banner_text`, `home_banner_text_sq`,
   `join_us_btn`, `join_us_btn_sq`,
@@ -181,47 +182,54 @@ INSERT IGNORE INTO `settings` (
   `menu_login`, `menu_login_sq`,
   `menu_register`, `menu_register_sq`
 ) VALUES (
-  1, 2, 'AsamblejaKombetare',
-  'A civic and political movement dedicated to democratic renewal, transparency, and building Albania''s future together.',
-  'Një lëvizje qytetare dhe politike e përkushtuar ndaj ripërtëritjes demokratike, transparencës dhe ndërtimit të së ardhmes së përbashkët.',
-  'Building Our National Future Together',
-  'Ndërtojmë të Ardhmen Tonë Kombëtare Së Bashku',
+  1, 3, 2, 'AsamblejaKombetare',
+  '<p>This is a civic and political movement that puts the citizen and the national interest first, with a clear vision for a democratic and European Albania.</p>',
+  '<p>Kjo është një lëvizje qytetare dhe politike që vendos qytetarin dhe interesin kombëtar në plan të parë, me një vizion të qartë për një Shqipëri demokratike dhe europiane.</p>',
+  'Join Us for a European Albania',
+  'Bashkohuni me ne për një Shqipëri Europiane',
   'Join Us Now', 'Bashkohuni Tani',
   'Our Core Values', 'Vlerat Tona Themelore',
-  'We stand for accountability, rule of law, modern public services, and giving citizens a real voice. Explore our Core Values to see our vision.',
-  'Ne angazhohemi për llogaridhënie, shtet ligjor, shërbime publike moderne dhe fuqizimin e zërit të qytetarëve. Njihuni me Vlerat tona Themelore.',
+  '<p>To all those who see themselves in these foundational principles and do not feel represented by any of the other alternatives, WE CALL ON YOU to join us, because our country needs the strength, energy, knowledge, mind, and talent of everyone.</p>',
+  '<p>Për të gjithë ata që e shohin veten në këto parime themelore dhe që nuk ndihen mirë me asnjë prej alternativave të tjera, JU BËJMË THIRRJE që të na bashkoheni, sepse vendi ynë ka nevojë për forcën, energjinë, diturinë, mendjen dhe talentin e të gjithëve.</p>',
   'View Core Values', 'Shiko Vlerat Themelore',
   'Latest Community Ideas', 'Idetë e Fundit të Komunitetit',
   'View All Ideas', 'Shiko të Gjitha Idetë',
   'Our Core Values', 'Vlerat Tona Themelore',
-  'Discover our foundational principles and express your support as an approved member.',
-  'Zbuloni parimet tona themelore dhe shprehni mbështetjen tuaj si anëtar i miratuar.',
+  '<p>Discover our core propositions for building a new future.</p>',
+  '<p>Zbuloni propozimet tona thelbësore për ndërtimin e një të ardhmeje të re.</p>',
   'Community Ideas', 'Idetë e Komunitetit',
-  'Explore policy proposals and civic ideas submitted by our members.',
-  'Shfletoni propozimet dhe idetë qytetare të dërguara nga anëtarët tanë.',
+  '<p>Explore the ideas submitted by our members and approved by our movement''s administrators.</p>',
+  '<p>Eksploroni idetë e paraqitura nga anëtarët tanë dhe të miratuara nga administratorët e partisë sonë.</p>',
   'Submit an Idea', 'Dërgo një Ide',
   'Contact Us', 'Na Kontaktoni',
-  'Have questions, proposals, or want to get involved with AsamblejaKombetare? Send us a message below.',
-  'Keni pyetje, propozime apo dëshironi të angazhoheni në AsamblejaKombetare? Na dërgoni një mesazh më poshtë.',
+  '<p>Have questions, ideas, or want to get involved? Please send us a message below.</p>',
+  '<p>Keni pyetje, ide, ose dëshironi të përfshiheni? Ju lutemi na dërgoni një mesazh më poshtë.</p>',
   'Register', 'Regjistrohu',
-  'Login', 'Hyrje',
+  'Login', 'Hyr',
   'All rights reserved.', 'Të gjitha të drejtat e rezervuara.',
   'Verify your email for {site_title}', 'Verifikoni email-in tuaj për {site_title}',
-  'Hello {username},\n\nThank you for registering with {site_title}.\nPlease click the link below to verify your email address:\n{verify_link}\n\nThank you,\n{site_title}',
-  'Përshëndetje {username},\n\nFaleminderit që u regjistruat në {site_title}.\nJu lutemi klikoni lidhjen e mëposhtme për të verifikuar adresën tuaj të email-it:\n{verify_link}\n\nFaleminderit,\n{site_title}',
-  'Home', 'Ballina',
+  'Hello {username},\n\nPlease click the link below to verify your email address:\n{verify_link}\n\nThank you,\n{site_title}',
+  'Përshëndetje {username},\n\nJu lutemi klikoni në lidhjen e mëposhtme për të verifikuar adresën tuaj të email-it:\n{verify_link}\n\nFaleminderit,\n{site_title}',
+  'Home', 'Kreu',
   'Core Values', 'Vlerat Themelore',
   'Ideas', 'Idetë',
-  'Public Profiles', 'Profilet Publike',
+  'Public Profiles', 'Profilet',
   'Contact', 'Kontakt',
   'Profile', 'Profili',
-  'Admin Panel', 'Administrimi',
+  'Admin Panel', 'Admin',
   'Logout', 'Dil',
   'Login', 'Hyr',
   'Register', 'Regjistrohu'
 );
 
--- Initial bootstrap admin for brand-new installations ONLY.
--- Change both the email address and password immediately upon first login!
-INSERT IGNORE INTO `users` (`username`, `password`, `email`, `email_verified`, `role`, `status`)
-VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@asamblejakombetare.al', 1, 'admin', 'approved');
+INSERT IGNORE INTO `core_values` (`id`, `title`, `description`, `title_sq`, `description_sq`) VALUES
+(1, '1. WE STAND FOR A DEMOCRATIC ALBANIA', 'We believe that democracy is the fairest and most legitimate form of state organization. Sovereignty stems from the people and is exercised by them through free, fair, and periodic elections, independent institutions, and respect for the rule of law. We defend political pluralism, the separation and balance of powers, freedom of expression, and the active participation of citizens in public life.', '1. NE JEMI PËR NJË SHQIPËRI DEMOKRATIKE', 'Ne besojmë se demokracia është forma më e drejtë dhe më legjitime e organizimit të shtetit. Sovraniteti buron nga populli dhe ushtrohet prej tij nëpërmjet zgjedhjeve të lira, të ndershme dhe periodike, institucioneve të pavarura dhe respektimit të shtetit të së drejtës. Ne mbrojmë pluralizmin politik, ndarjen dhe balancimin e pushteteve, lirinë e shprehjes dhe pjesëmarrjen aktive të qytetarëve në jetën publike.'),
+(2, '2. WE STAND FOR A SECULAR ALBANIA', 'We believe in a state neutral toward religious beliefs, guaranteeing freedom of conscience and religion for every citizen. Religious belief is an individual right within the boundaries of the private sphere. Public decision-making must rest on the Constitution, secular rather than divine laws, science, and the public interest, maintaining a clear separation between the state and religious institutions.', '2. NE JEMI PËR NJË SHQIPËRI LAIKE', 'Ne besojmë në një shtet neutral ndaj besimeve fetare, i cili garanton lirinë e ndërgjegjes dhe të fesë për çdo qytetar. Besimi fetar është një e drejtë individuale, por deri në kufijtë e sferës publike. Vendimmarrja publike duhet të mbështetet mbi Kushtetutën, ligjet tokësore dhe jo hyjnore, shkencën dhe interesin publik, duke ruajtur ndarjen e qartë ndërmjet shtetit dhe institucioneve fetare.'),
+(3, '3. WE STAND FOR A EUROPEAN ALBANIA', 'We believe that Albania''s future is inseparable from the European family. We unequivocally support the country''s full integration into the European Union, not merely as a political objective, but as a commitment to building strong institutions, a competitive economy, an independent judiciary, and high democratic standards. Europe represents the natural space for Albania''s development.', '3. NE JEMI PËR NJË SHQIPËRI EUROPIANE', 'Ne besojmë se e ardhmja e Shqipërisë është e pandashme nga familja evropiane. Mbështesim pa mëdyshje integrimin e plotë të vendit në Bashkimin Europian, jo vetëm si një objektiv politik, por si një angazhim për të ndërtuar institucione të forta, ekonomi konkurruese, drejtësi të pavarur dhe standarde të larta demokratike. Evropa përfaqëson hapësirën natyrore të zhvillimit të Shqipërisë.'),
+(4, '4. WE STAND FOR A JUST ALBANIA', 'We believe that no one should be above the law. Justice must be independent, impartial, and equal for all. The fight against corruption, transparency, and accountability are indispensable conditions for building citizens'' trust in the state.', '4. NE JEMI PËR NJË SHQIPËRI TË DREJTË', 'Ne besojmë se askush nuk duhet të jetë mbi ligjin. Drejtësia duhet të jetë e pavarur, e paanshme dhe e barabartë për të gjithë. Lufta kundër korrupsionit, transparenca dhe llogaridhënia janë kushte të domosdoshme për ndërtimin e besimit të qytetarëve ndaj shtetit.'),
+(5, '5. WE STAND FOR A HUMANIST ALBANIA', 'We place human dignity at the center of politics. We defend the fundamental rights and freedoms of every individual, without distinction of gender, age, origin, belief, or social status. We believe in international cooperation, dialogue, peace, and solidarity as values that strengthen Albania''s development and the well-being of its citizens.', '5. NE JEMI PËR NJË SHQIPËRI HUMANISTE', 'Ne vendosim dinjitetin njerëzor në qendër të politikës. Mbrojmë të drejtat dhe liritë themelore të çdo individi, pa dallim gjinie, moshe, origjine, bindjeje apo statusi social. Besojmë në bashkëpunimin ndërkombëtar, dialogun, paqen dhe solidaritetin si vlera që forcojnë zhvillimin e Shqipërisë dhe mirëqenien e qytetarëve të saj.'),
+(6, '6. WE STAND FOR A GREEN AND SUSTAINABLE ALBANIA', 'We believe that environmental protection is an obligation toward both present and future generations. We are committed to protecting forests, rivers, coastlines, biodiversity, and natural resources, fighting pollution and climate change, and developing a green economy that creates prosperity without harming the ecosystem. Economic development must always be sustainable and in harmony with nature.', '6. NE JEMI PËR NJË SHQIPËRI TË GJELBËR DHE TË QËNDRUESHME', 'Ne besojmë se mbrojtja e mjedisit është detyrim ndaj brezave të sotëm dhe atyre që do të vijnë. Angazhohemi për mbrojtjen e pyjeve, lumenjve, brigjeve, biodiversitetit dhe burimeve natyrore, për luftën kundër ndotjes dhe ndryshimeve klimatike, si dhe për zhvillimin e një ekonomie të gjelbër që krijon mirëqenie pa dëmtuar ekosistemin. Zhvillimi ekonomik duhet të jetë gjithmonë i qëndrueshëm dhe në harmoni me natyrën.'),
+(7, '7. WE STAND FOR AN ALBANIA OF MERIT AND OPPORTUNITY', 'We believe that success must be built upon merit, ability, and honest work. Every citizen must have equal opportunities for quality education, employment, entrepreneurship, and professional growth, free from privilege, nepotism, or discrimination.', '7. NE JEMI PËR NJË SHQIPËRI TË MERITËS DHE MUNDËSIVE', 'Ne besojmë se suksesi duhet të ndërtohet mbi meritën, aftësinë dhe punën e ndershme. Çdo qytetar duhet të ketë mundësi të barabarta për arsim cilësor, punësim, sipërmarrje dhe zhvillim profesional, pa privilegje, nepotizëm apo diskriminim.');
+
+INSERT IGNORE INTO `users` (`id`, `username`, `password`, `email`, `email_verified`, `role`, `status`, `privacy_accepted_at`)
+VALUES (1, 'admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'info@asamblejakombetare.com', 1, 'admin', 'approved', NOW());

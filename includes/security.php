@@ -10,6 +10,10 @@
  * - Live database session/role validation
  */
 
+if (!defined('AK_THEME_VERSION')) {
+    define('AK_THEME_VERSION', '20261028.3');
+}
+
 function is_https_request(): bool {
     if (!empty($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off') {
         return true;
@@ -48,6 +52,7 @@ function init_session_and_headers(): void {
     $https = is_https_request();
 
     if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+        session_cache_limiter('');
         ini_set('session.use_strict_mode', '1');
         ini_set('session.use_only_cookies', '1');
         ini_set('session.cookie_httponly', '1');
@@ -86,6 +91,17 @@ function init_session_and_headers(): void {
         header('Permissions-Policy: camera=(), geolocation=(), microphone=()');
         header('Cross-Origin-Opener-Policy: same-origin-allow-popups');
         header('Vary: Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site');
+        header('Surrogate-Control: no-store');
+        header('X-Accel-Expires: 0');
+
+        $is_admin_route = strpos(str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? '')), '/admin/') !== false;
+        $is_authenticated = !empty($_SESSION['user_id']);
+        $is_mutation = (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET');
+        if ($is_admin_route || $is_authenticated || $is_mutation) {
+            header('Cache-Control: private, no-store, no-cache, must-revalidate');
+        } else {
+            header('Cache-Control: no-cache, max-age=0, must-revalidate');
+        }
 
         if ($https) {
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
@@ -331,7 +347,94 @@ function validate_username_format(string $username): bool {
     if ($len < 3 || $len > 50) {
         return false;
     }
-    return (bool)preg_match('/^[\p{L}\p{N}_.\-]+$/u', $username);
+    return (bool)preg_match('/^[\p{L}\p{N}_.\-]+(?: [\p{L}\p{N}_.\-]+)*$/u', $username);
+}
+
+function asset_version(string $relative_path = ''): string {
+    $cache_ver = (int)($GLOBALS['global_settings']['cache_version'] ?? 1);
+    $mtime = 0;
+    $size = 0;
+    if ($relative_path !== '') {
+        $clean = ltrim(preg_replace('/\?.*$/', '', $relative_path), '/\\');
+        $disk_path = dirname(__DIR__) . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $clean);
+        if (is_file($disk_path)) {
+            $mtime = (int)@filemtime($disk_path);
+            $size = (int)@filesize($disk_path);
+        }
+    }
+    return substr(hash('sha256', AK_THEME_VERSION . '|' . $cache_ver . '|' . $mtime . '|' . $size), 0, 12);
+}
+
+function asset_url(string $relative_path, string $prefix = ''): string {
+    $clean = ltrim($relative_path, '/');
+    return $prefix . $clean . '?v=' . asset_version($clean);
+}
+
+function current_theme_revision(?array $settings = null): string {
+    $settings = $settings ?? ($GLOBALS['global_settings'] ?? []);
+    $cache_ver = (int)($settings['cache_version'] ?? 1);
+    return AK_THEME_VERSION . '.' . $cache_ver;
+}
+
+function sync_browser_theme_cache(array $settings): void {
+    if (headers_sent()) {
+        return;
+    }
+    $rev = current_theme_revision($settings);
+    $cookie_rev = (string)($_COOKIE['ak_theme_rev'] ?? '');
+    if ($cookie_rev !== $rev) {
+        $https = is_https_request();
+        setcookie('ak_theme_rev', $rev, [
+            'expires' => time() + 31536000,
+            'path' => '/',
+            'secure' => $https,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+        $_COOKIE['ak_theme_rev'] = $rev;
+        if ($https) {
+            header('Clear-Site-Data: "cache"');
+        }
+    }
+}
+
+function flush_app_caches(?PDO $pdo = null, bool $bump_db_version = true): int {
+    clearstatcache(true);
+    if (function_exists('opcache_reset')) {
+        @opcache_reset();
+    }
+
+    $new_ver = (int)($GLOBALS['global_settings']['cache_version'] ?? 1);
+    if ($bump_db_version && $pdo instanceof PDO) {
+        try {
+            $pdo->exec("UPDATE `settings` SET `cache_version` = COALESCE(`cache_version`, 1) + 1 WHERE `id` = 1");
+            $new_ver = (int)$pdo->query("SELECT `cache_version` FROM `settings` WHERE `id` = 1")->fetchColumn();
+            if ($new_ver < 1) {
+                $new_ver = 2;
+            }
+            $GLOBALS['global_settings']['cache_version'] = $new_ver;
+        } catch (Throwable $e) {
+            error_log('Cache version bump failed: ' . $e->getMessage());
+        }
+    }
+
+    if (!headers_sent()) {
+        $https = is_https_request();
+        $rev = AK_THEME_VERSION . '.' . $new_ver;
+        setcookie('ak_theme_rev', $rev, [
+            'expires' => time() + 31536000,
+            'path' => '/',
+            'secure' => $https,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+        $_COOKIE['ak_theme_rev'] = $rev;
+        if ($https) {
+            header('Clear-Site-Data: "cache"');
+        }
+    }
+
+    return $new_ver;
 }
 
 function destroy_user_session(bool $send_clear_site_data = true): void {

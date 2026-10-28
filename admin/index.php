@@ -2,6 +2,17 @@
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/admin_auth.php';
 
+$cache_notice = '';
+$cache_error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'clear_cache') {
+    if (!verify_csrf()) {
+        $cache_error = __('csrf_error');
+    } else {
+        $new_ver = flush_app_caches($pdo, true);
+        $cache_notice = "Application OPcache cleared and theme/asset version bumped to v{$new_ver}. All visitors will immediately load the latest theme and stylesheets.";
+    }
+}
+
 $users_count = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $pending_users = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE status = 'pending'")->fetchColumn();
 $ideas_count = (int)$pdo->query("SELECT COUNT(*) FROM ideas")->fetchColumn();
@@ -32,10 +43,18 @@ $page_title = 'Admin Dashboard - ' . $t_site_title;
             <div class="flex-header" style="margin-bottom: 20px;">
                 <h1 style="margin:0;">Dashboard</h1>
                 <div class="profile-actions">
+                    <form method="POST" action="index.php" style="display:inline; margin:0;">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="action" value="clear_cache">
+                        <button type="submit" class="btn btn-sm">Clear Cache &amp; Refresh Theme</button>
+                    </form>
                     <a href="../change_email.php" class="btn btn-sm btn-secondary">Change Email</a>
                     <a href="../change_password.php" class="btn btn-sm btn-secondary">Change Password</a>
                 </div>
             </div>
+
+            <?php if ($cache_error): ?><p class="error" role="alert"><?= htmlspecialchars($cache_error, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
+            <?php if ($cache_notice): ?><p class="success" role="status"><?= htmlspecialchars($cache_notice, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
 
             <?php if ($has_default_password || $has_placeholder_email): ?>
                 <div class="warning-banner" role="alert">
@@ -80,6 +99,6 @@ $page_title = 'Admin Dashboard - ' . $t_site_title;
         </main>
     </div>
     <?php include __DIR__ . '/../includes/footer.php'; ?>
-    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="../assets/js/main.js"></script>
+    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="<?= htmlspecialchars(asset_url('assets/js/main.js', '../'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>

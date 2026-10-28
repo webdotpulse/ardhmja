@@ -21,6 +21,9 @@ $all_columns = array_merge(array_keys($en_defaults), array_keys($sq_defaults));
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf()) {
         $error = __('csrf_error');
+    } elseif (($_POST['action'] ?? '') === 'clear_cache') {
+        $new_ver = flush_app_caches($pdo, true);
+        $success = "Cache cleared and theme assets refreshed (revision v{$new_ver}).";
     } else {
         $set_clauses = [];
         $params = [];
@@ -46,7 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ins->execute($params);
         }
 
-        $success = 'Site settings (English & Albanian) saved successfully.';
+        flush_app_caches($pdo, true);
+        $success = 'Site settings (English & Albanian) saved and cache refreshed.';
     }
 }
 
@@ -77,7 +81,14 @@ $page_title = 'Site Settings - ' . $t_site_title;
     <div class="admin-wrapper">
         <?php include __DIR__ . '/admin_sidebar.php'; ?>
         <main id="main-content" class="admin-content">
-            <h1>Site Settings</h1>
+            <div class="flex-header" style="margin-bottom: 18px;">
+                <h1 style="margin:0;">Site Settings</h1>
+                <form method="POST" action="settings.php" style="margin:0;">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="clear_cache">
+                    <button type="submit" class="btn btn-sm btn-secondary">Clear Cache &amp; Refresh Theme</button>
+                </form>
+            </div>
 
             <?php if ($error): ?><p class="error" role="alert"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
             <?php if ($success): ?><p class="success" role="status"><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
@@ -227,7 +238,7 @@ $page_title = 'Site Settings - ' . $t_site_title;
         </main>
     </div>
     <?php include __DIR__ . '/../includes/footer.php'; ?>
-    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="../assets/js/main.js"></script>
-    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="../assets/js/admin-editor.js"></script>
+    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="<?= htmlspecialchars(asset_url('assets/js/main.js', '../'), ENT_QUOTES, 'UTF-8') ?>"></script>
+    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="<?= htmlspecialchars(asset_url('assets/js/admin-editor.js', '../'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>

@@ -34,7 +34,7 @@ function send_app_email(string $to_email, string $to_name, string $subject, stri
         $mail->Port = (int)SMTP_PORT;
         $mail->Timeout = 10;
 
-        $from_email = filter_var(SMTP_FROM_EMAIL, FILTER_VALIDATE_EMAIL) ? SMTP_FROM_EMAIL : 'noreply@asamblejakombetare.al';
+        $from_email = filter_var(SMTP_FROM_EMAIL, FILTER_VALIDATE_EMAIL) ? SMTP_FROM_EMAIL : 'info@asamblejakombetare.com';
         $from_name = defined('SMTP_FROM_NAME') ? SMTP_FROM_NAME : 'AsamblejaKombetare';
 
         $mail->setFrom($from_email, $from_name);

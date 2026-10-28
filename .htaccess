@@ -38,8 +38,8 @@ ErrorDocument 500 /500.php
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Header always set Permissions-Policy "camera=(), geolocation=(), microphone=()"
 
-    # Cache static fonts & optimized images
-    <FilesMatch "\.(woff2|webp|jpg|jpeg|png|gif|ico)$">
-        Header set Cache-Control "public, max-age=2592000, immutable"
+    # Cache versioned static assets (?v=... busts cache automatically on file/theme changes)
+    <FilesMatch "\.(css|js|woff2|webp|jpg|jpeg|png|gif|ico)$">
+        Header set Cache-Control "public, max-age=2592000"
     </FilesMatch>
 </IfModule>
