@@ -1,131 +1,198 @@
 <?php
-require_once '../includes/db.php';
-require_once 'admin_auth.php';
+require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/admin_auth.php';
 
-if (!isset($_GET['id'])) {
+$user_id = (int)($_GET['id'] ?? 0);
+if ($user_id <= 0) {
     header('Location: users.php');
-    exit();
+    exit;
 }
 
-$user_id = $_GET['id'];
-
-// Handle form submission
-$success = '';
-$error = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $is_public = isset($_POST['is_public']) ? 1 : 0;
-
-    // Handle file upload
-    $profile_picture = null;
-    $upload_dir = '../uploads/';
-
-    if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0755, true);
-    }
-
-    if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
-        $tmp_name = $_FILES['profile_picture']['tmp_name'];
-        $name = basename($_FILES['profile_picture']['name']);
-        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-
-        $allowed_exts = ['jpg', 'jpeg', 'png', 'gif'];
-        if (in_array($ext, $allowed_exts)) {
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $mime_type = finfo_file($finfo, $tmp_name);
-            finfo_close($finfo);
-
-            $allowed_mimes = ['image/jpeg', 'image/png', 'image/gif'];
-            if (in_array($mime_type, $allowed_mimes)) {
-                $new_filename = uniqid() . '_' . $user_id . '.' . $ext;
-                if (move_uploaded_file($tmp_name, $upload_dir . $new_filename)) {
-                    $profile_picture = $new_filename;
-                } else {
-                    $error = "Failed to upload image.";
-                }
-            } else {
-                $error = "Invalid file content. Only real JPG, PNG, and GIF images are allowed.";
-            }
-        } else {
-            $error = "Invalid file type. Only JPG, PNG, and GIF are allowed.";
-        }
-    }
-
-    if (!$error) {
-        if ($profile_picture) {
-            $stmt = $pdo->prepare("UPDATE users SET is_public = ?, profile_picture = ? WHERE id = ?");
-            $stmt->execute([$is_public, $profile_picture, $user_id]);
-        } else {
-            $stmt = $pdo->prepare("UPDATE users SET is_public = ? WHERE id = ?");
-            $stmt->execute([$is_public, $user_id]);
-        }
-        $success = "User updated successfully.";
-    }
-}
-
-// Fetch user data
 $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
-$user = $stmt->fetch();
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$user) {
     header('Location: users.php');
-    exit();
+    exit;
 }
+
+$success = '';
+$error = '';
+$upload_dir = __DIR__ . '/../uploads';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verify_csrf()) {
+        $error = __('csrf_error');
+    } else {
+        $is_public = isset($_POST['is_public']) ? 1 : 0;
+        $remove_picture = !empty($_POST['remove_picture']);
+        $full_name = trim((string)($_POST['full_name'] ?? ''));
+        $party_role = trim((string)($_POST['party_role'] ?? ''));
+        $party_role_sq = trim((string)($_POST['party_role_sq'] ?? ''));
+        $bio = trim((string)($_POST['bio'] ?? ''));
+        $bio_sq = trim((string)($_POST['bio_sq'] ?? ''));
+
+        if (mb_strlen($full_name, 'UTF-8') > 120 || mb_strlen($party_role, 'UTF-8') > 120 || mb_strlen($party_role_sq, 'UTF-8') > 120) {
+            $error = 'Name and role titles must be 120 characters or fewer.';
+        } elseif (mb_strlen($bio, 'UTF-8') > 2000 || mb_strlen($bio_sq, 'UTF-8') > 2000) {
+            $error = 'Biography text must be 2,000 characters or fewer.';
+        }
+
+        $new_picture = $user['profile_picture'] ?? null;
+
+        if (!$error && $remove_picture && $new_picture) {
+            delete_uploaded_avatar($new_picture, $upload_dir);
+            $new_picture = null;
+        }
+
+        if (!$error && isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $file_err = (int)$_FILES['profile_picture']['error'];
+            if ($file_err !== UPLOAD_ERR_OK) {
+                $error = 'Image upload failed (the file may exceed the maximum upload size of 2 MB).';
+            } elseif ((int)$_FILES['profile_picture']['size'] > 2 * 1024 * 1024) {
+                $error = 'Profile picture must be 2 MB or smaller.';
+            } else {
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0755, true);
+                }
+
+                $tmp_name = $_FILES['profile_picture']['tmp_name'];
+                $orig_name = basename((string)$_FILES['profile_picture']['name']);
+                $ext = strtolower(pathinfo($orig_name, PATHINFO_EXTENSION));
+
+                $allowed_map = [
+                    'jpg' => 'image/jpeg',
+                    'jpeg' => 'image/jpeg',
+                    'png' => 'image/png',
+                    'gif' => 'image/gif',
+                    'webp' => 'image/webp',
+                ];
+
+                if (!isset($allowed_map[$ext])) {
+                    $error = 'Invalid file extension. Allowed formats: JPG, PNG, GIF, WebP.';
+                } else {
+                    $finfo = new finfo(FILEINFO_MIME_TYPE);
+                    $mime_type = $finfo->file($tmp_name);
+
+                    if (!in_array($mime_type, array_values($allowed_map), true)) {
+                        $error = 'Invalid image content. Only valid JPG, PNG, GIF, or WebP files are allowed.';
+                    } else {
+                        $generated = bin2hex(random_bytes(12)) . '_' . $user_id . '.' . $ext;
+                        if (move_uploaded_file($tmp_name, $upload_dir . DIRECTORY_SEPARATOR . $generated)) {
+                            if (!empty($user['profile_picture']) && $user['profile_picture'] !== $generated) {
+                                delete_uploaded_avatar($user['profile_picture'], $upload_dir);
+                            }
+                            $new_picture = $generated;
+                        } else {
+                            $error = 'Failed to save uploaded image on server.';
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!$error) {
+            $upd = $pdo->prepare("
+                UPDATE users
+                SET is_public = ?, profile_picture = ?, full_name = ?, party_role = ?, party_role_sq = ?, bio = ?, bio_sq = ?
+                WHERE id = ?
+            ");
+            $upd->execute([
+                $is_public,
+                $new_picture,
+                $full_name !== '' ? $full_name : null,
+                $party_role !== '' ? $party_role : null,
+                $party_role_sq !== '' ? $party_role_sq : null,
+                $bio !== '' ? $bio : null,
+                $bio_sq !== '' ? $bio_sq : null,
+                $user_id,
+            ]);
+            $success = 'User profile updated successfully.';
+
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+            $stmt->execute([$user_id]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+    }
+}
+
+$page_title = 'Edit User - ' . $t_site_title;
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(current_lang(), ENT_QUOTES, 'UTF-8') ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit User</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <style>
-        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
-        .admin-wrapper { display: flex; flex: 1; }
-        .admin-content { flex: 1; padding: 20px; }
-        .edit-form { max-width: 500px; background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #ddd;}
-        .edit-form label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .edit-form input[type="file"], .edit-form input[type="checkbox"] { margin-bottom: 15px; }
-        .current-picture { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; margin-bottom: 15px; display: block; background: #eee;}
-    </style>
-    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
+    <?php include __DIR__ . '/../includes/head.php'; ?>
 </head>
 <body>
     <div class="admin-wrapper">
-    <?php include 'admin_sidebar.php'; ?>
-    <div class="admin-content">
-        <h1>Edit User: <?= htmlspecialchars($user['username']) ?></h1>
-        <a href="users.php" class="btn btn-sm" style="margin-bottom: 20px;">&larr; Back to Users</a>
+        <?php include __DIR__ . '/admin_sidebar.php'; ?>
+        <main id="main-content" class="admin-content">
+            <h1>Edit User: <?= htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8') ?></h1>
+            <p class="text-muted">Email: <strong><?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?></strong> &middot; Status: <strong><?= htmlspecialchars($user['status'], ENT_QUOTES, 'UTF-8') ?></strong></p>
+            <p><a href="users.php?status=<?= urlencode($user['status']) ?>" class="btn btn-sm btn-secondary">&larr; Back to Users</a></p>
 
-        <?php if ($error): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
-        <?php if ($success): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
+            <?php if ($error): ?><p class="error" role="alert"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
+            <?php if ($success): ?><p class="success" role="status"><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
 
-        <form method="POST" enctype="multipart/form-data" class="edit-form">
-            <div class="form-group">
-                <label>Current Profile Picture</label>
-                <?php if ($user['profile_picture']): ?>
-                    <img src="../uploads/<?= htmlspecialchars($user['profile_picture']) ?>" class="current-picture" alt="Profile Picture">
-                <?php else: ?>
-                    <div class="current-picture" style="line-height: 100px; text-align: center; color: #999;">No Image</div>
-                <?php endif; ?>
+            <form method="POST" action="edit_user.php?id=<?= $user_id ?>" enctype="multipart/form-data" class="auth-form form-wide">
+                <?= csrf_field() ?>
 
-                <label for="profile_picture">Upload New Picture</label>
-                <input type="file" name="profile_picture" id="profile_picture" accept="image/*">
-            </div>
+                <div class="form-group">
+                    <label>Current Profile Picture</label>
+                    <?php if (!empty($user['profile_picture'])): ?>
+                        <img src="../uploads/<?= htmlspecialchars(basename($user['profile_picture']), ENT_QUOTES, 'UTF-8') ?>" class="profile-picture" style="margin:0 0 12px;" alt="Current avatar">
+                        <div class="checkbox-group" style="margin-bottom: 12px;">
+                            <label for="remove_picture">
+                                <input type="checkbox" id="remove_picture" name="remove_picture" value="1">
+                                <span>Remove current picture</span>
+                            </label>
+                        </div>
+                    <?php else: ?>
+                        <div class="profile-picture" style="margin:0 0 12px;"><?= htmlspecialchars(__('no_image'), ENT_QUOTES, 'UTF-8') ?></div>
+                    <?php endif; ?>
 
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="is_public" value="1" <?= $user['is_public'] ? 'checked' : '' ?>>
-                    Show this user on the Public Profiles page
-                </label>
-            </div>
+                    <label for="profile_picture">Upload New Picture (JPG, PNG, GIF, WebP — max 2 MB)</label>
+                    <input type="file" name="profile_picture" id="profile_picture" accept="image/jpeg,image/png,image/gif,image/webp">
+                </div>
 
-            <button type="submit" class="btn">Save Changes</button>
-        </form>
+                <div class="form-group">
+                    <label for="full_name">Display / Full Name (optional)</label>
+                    <input type="text" id="full_name" name="full_name" maxlength="120" value="<?= htmlspecialchars((string)($user['full_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="party_role">Role / Title — English (optional)</label>
+                    <input type="text" id="party_role" name="party_role" maxlength="120" placeholder="e.g. Coordinator, Tirana" value="<?= htmlspecialchars((string)($user['party_role'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="party_role_sq">Role / Title — Albanian / Shqip (optional)</label>
+                    <input type="text" id="party_role_sq" name="party_role_sq" maxlength="120" placeholder="p.sh. Koordinator, Tiranë" value="<?= htmlspecialchars((string)($user['party_role_sq'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="bio">Short Biography — English (optional)</label>
+                    <textarea id="bio" name="bio" rows="3" maxlength="2000"><?= htmlspecialchars((string)($user['bio'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="bio_sq">Short Biography — Albanian / Shqip (optional)</label>
+                    <textarea id="bio_sq" name="bio_sq" rows="3" maxlength="2000"><?= htmlspecialchars((string)($user['bio_sq'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <label for="is_public">
+                        <input type="checkbox" id="is_public" name="is_public" value="1" <?= !empty($user['is_public']) ? 'checked' : '' ?>>
+                        <span>Show this user on the Public Profiles page (requires Approved status)</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn">Save Changes</button>
+            </form>
+        </main>
     </div>
-    </div>
-    <?php include "../includes/footer.php"; ?>
-    <script src="../assets/js/main.js"></script>
+    <?php include __DIR__ . '/../includes/footer.php'; ?>
+    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="../assets/js/main.js"></script>
 </body>
 </html>

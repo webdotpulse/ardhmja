@@ -1,31 +1,67 @@
-Installation Manual for Combell Webhosting
+Deployment & Upgrade Manual for Combell Shared Webhosting (AsamblejaKombetare)
+=============================================================================
 
-1. Upload Files
-   - Log into your Combell control panel and navigate to File Manager, or use an FTP client (like FileZilla).
-   - Upload all the files and folders from this project into your `www` or `public_html` directory on Combell.
+IMPORTANT — PROTECTING EXISTING USERS & DATABASE CONTENT:
+If you ALREADY have a database with registered users, ideas, core values, or
+settings on Combell:
+  - DO NOT import `database.sql` (that file is only for brand-new empty setups).
+  - Your existing users and content are 100% preserved automatically! When you
+    upload the updated PHP files, `includes/migrations.php` safely adds the new
+    bilingual and password-reset columns without deleting or overwriting any
+    existing rows. (Optionally, you can also run `upgrade.sql` in phpMyAdmin.)
 
-2. Setup Database
-   - In the Combell control panel, go to the Databases section and create a new MySQL database.
-   - Note down the database name, username, password, and hostname provided by Combell.
-   - Open phpMyAdmin from the Combell control panel for your new database.
-   - Go to the 'Import' tab and upload the `database.sql` file provided in this project to create the necessary tables and initial admin user.
+-----------------------------------------------------------------------------
+A. UPGRADING AN EXISTING COMBELL INSTALLATION (ZERO DATA LOSS)
+-----------------------------------------------------------------------------
 
-3. Configure Application
-   - Open `includes/db.php` on the server.
-   - Update the `$host`, `$dbname`, `$username`, and `$password` variables with the details from step 2.
+1. Take a Quick Backup (Recommended Best Practice)
+   - In Combell Control Panel -> Databases -> phpMyAdmin, click the `Export`
+     tab and download a `.sql` backup of your current database.
 
-   Example:
-   $host = 'your-combell-db-host'; // Often a specific hostname, not localhost
-   $dbname = 'your_database_name';
-   $username = 'your_database_user';
-   $password = 'your_database_password';
+2. Create `includes/config.local.php` on the Server
+   - Copy `includes/config.example.php` to `includes/config.local.php`.
+   - Fill in:
+     * `APP_URL`: `'https://yourdomain.com'` (no trailing slash)
+     * `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS`: your existing Combell MySQL
+       credentials (previously in `includes/db.php`).
+     * `SMTP_HOST`: `'smtp-auth.mailprotect.be'`
+     * `SMTP_PORT`: `587` (or `2525`) with `SMTP_ENCRYPTION` = `'tls'`
+     * `SMTP_USERNAME` & `SMTP_PASSWORD`: your Combell mailbox credentials
+     * `SMTP_FROM_EMAIL`: same mailbox address (e.g. `'noreply@yourdomain.com'`)
+     * `ADMIN_NOTIFICATION_EMAIL`: optional comma-separated email(s) to receive
+       alerts on new registrations, ideas, and contact messages (if left empty,
+       all approved admin accounts in the database are notified automatically).
 
-4. Admin Access
-   - You can access the admin panel by navigating to `yourdomain.com/admin/`.
-   - Default login:
-     Username: admin
+3. Upload All Project Files via SFTP / File Manager
+   - Upload all files and folders (including `.htaccess`, `uploads/.htaccess`,
+     `includes/`, `vendor/`, `admin/`, and `assets/`) into your `www` directory
+     on Combell. Make sure hidden dotfiles (`.htaccess`) are shown/uploaded in
+     your FTP client (e.g. FileZilla -> Server -> Force showing hidden files).
+   - Do NOT delete your existing `uploads/` folder on Combell so existing user
+     profile pictures remain intact; only add `uploads/.htaccess` inside it.
+   - Do NOT upload the `.git/` folder.
+
+4. Verify Automatic Database Upgrade
+   - Visit your website in a browser. `includes/migrations.php` will
+     automatically add the new columns (`_sq` translations, `reset_token`,
+     `full_name`, `party_role`, `bio`, `rate_limits`) while keeping all existing
+     users, passwords, ideas, agreements, messages, and custom settings intact.
+   - Log into `/admin/` using your admin **email address** and check the
+     Dashboard for any security notices (such as updating a default password or
+     placeholder admin email via `Change Email` / `Change Password`).
+
+-----------------------------------------------------------------------------
+B. FRESH INSTALLATION ON A BRAND-NEW EMPTY DATABASE
+-----------------------------------------------------------------------------
+
+1. Create a MySQL database and mailbox in the Combell Control Panel.
+2. In phpMyAdmin, import `database.sql` into the empty database.
+3. Copy `includes/config.example.php` to `includes/config.local.php` and enter
+   your `APP_URL`, MySQL credentials, and Combell SMTP credentials.
+4. Upload all project files (including `.htaccess` and `vendor/`, excluding
+   `.git/`) to Combell's `www` directory.
+5. Visit `https://yourdomain.com/login.php` and sign in with:
+     Email:    admin@asamblejakombetare.al
      Password: password
-   - Important: Change this password immediately after logging in for the first time by editing the database or adding a change password feature.
-
-5. Directory Permissions
-   - Ensure the folders have standard permissions (usually 755 for directories, 644 for files) so the web server can read them properly. Combell usually handles this by default.
+6. Immediately click `Change Email` and `Change Password` in the Admin Dashboard
+   to set your real administrator email and a strong unique password.

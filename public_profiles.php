@@ -1,84 +1,96 @@
 <?php
-session_start();
-require_once 'includes/db.php';
+require_once __DIR__ . '/includes/db.php';
 
-// Fetch users who are either admins or have been made public by an admin
-$stmt = $pdo->query("SELECT username, role, profile_picture FROM users WHERE role = 'admin' OR is_public = 1 ORDER BY role ASC, username ASC");
-$profiles = $stmt->fetchAll();
+$per_page = 12;
+$page = max(1, (int)($_GET['page'] ?? 1));
+$total_profiles = 0;
+$total_pages = 1;
+$profiles = [];
 
+if ($pdo instanceof PDO) {
+    $total_profiles = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE is_public = 1 AND status = 'approved'")->fetchColumn();
+    $total_pages = max(1, (int)ceil($total_profiles / $per_page));
+    if ($page > $total_pages) {
+        $page = $total_pages;
+    }
+    $offset = ($page - 1) * $per_page;
+
+    $stmt = $pdo->prepare("
+        SELECT username, full_name, role, profile_picture, party_role, party_role_sq, bio, bio_sq
+        FROM users
+        WHERE is_public = 1 AND status = 'approved'
+        ORDER BY role DESC, username ASC
+        LIMIT ? OFFSET ?
+    ");
+    $stmt->bindValue(1, $per_page, PDO::PARAM_INT);
+    $stmt->bindValue(2, $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    $profiles = $stmt->fetchAll();
+}
+
+$lang = current_lang();
+$page_title = $t_menu_profiles . ' - ' . $t_site_title;
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars($lang, ENT_QUOTES, 'UTF-8') ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Public Profiles - <?= htmlspecialchars($t_site_title) ?></title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <style>
-        .profiles-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .profile-card {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .profile-picture {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 15px;
-            background-color: #eee;
-            display: inline-block;
-        }
-        .profile-card h3 {
-            margin: 0 0 5px 0;
-            font-size: 1.2em;
-        }
-        .profile-card p {
-            margin: 0;
-            color: #666;
-            font-size: 0.9em;
-        }
-    </style>
-    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <?php include __DIR__ . '/includes/head.php'; ?>
 </head>
 <body>
-    <?php include 'includes/header.php'; ?>
-    <div class="container main-content">
-        <h2>Public Profiles</h2>
-        <p>Meet our team members and public figures.</p>
+    <?php include __DIR__ . '/includes/header.php'; ?>
+    <main id="main-content" class="container main-content">
+        <h1><?= htmlspecialchars($t_menu_profiles, ENT_QUOTES, 'UTF-8') ?></h1>
+        <p><?= htmlspecialchars(__('public_profiles_intro'), ENT_QUOTES, 'UTF-8') ?></p>
 
         <?php if (empty($profiles)): ?>
-            <p>No public profiles available at the moment.</p>
+            <p><?= htmlspecialchars(__('no_public_profiles'), ENT_QUOTES, 'UTF-8') ?></p>
         <?php else: ?>
             <div class="profiles-grid">
-                <?php foreach ($profiles as $profile): ?>
-                    <div class="profile-card">
-                        <?php if ($profile['profile_picture']): ?>
-                            <img src="uploads/<?= htmlspecialchars($profile['profile_picture']) ?>" alt="Profile Picture" class="profile-picture">
+                <?php foreach ($profiles as $profile):
+                    $display_name = !empty(trim((string)($profile['full_name'] ?? '')))
+                        ? $profile['full_name']
+                        : $profile['username'];
+
+                    $custom_role = ($lang === 'sq' && !empty(trim((string)($profile['party_role_sq'] ?? ''))))
+                        ? $profile['party_role_sq']
+                        : ($profile['party_role'] ?? '');
+                    $display_role = !empty(trim((string)$custom_role))
+                        ? $custom_role
+                        : ($profile['role'] === 'admin' ? __('role_admin') : __('role_member'));
+
+                    $display_bio = ($lang === 'sq' && !empty(trim((string)($profile['bio_sq'] ?? ''))))
+                        ? $profile['bio_sq']
+                        : ($profile['bio'] ?? '');
+                ?>
+                    <article class="profile-card">
+                        <?php if (!empty($profile['profile_picture'])): ?>
+                            <img src="uploads/<?= htmlspecialchars(basename($profile['profile_picture']), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($display_name, ENT_QUOTES, 'UTF-8') ?>" class="profile-picture" width="104" height="104" loading="lazy">
                         <?php else: ?>
-                            <div class="profile-picture" style="line-height: 100px; color: #999;">No Image</div>
+                            <div class="profile-picture" aria-hidden="true"><?= htmlspecialchars(__('no_image'), ENT_QUOTES, 'UTF-8') ?></div>
                         <?php endif; ?>
-                        <h3><?= htmlspecialchars($profile['username']) ?></h3>
-                        <p><?= $profile['role'] === 'admin' ? 'Admin' : 'Member' ?></p>
-                    </div>
+                        <h3><?= htmlspecialchars($display_name, ENT_QUOTES, 'UTF-8') ?></h3>
+                        <p class="profile-role"><?= htmlspecialchars($display_role, ENT_QUOTES, 'UTF-8') ?></p>
+                        <?php if (!empty(trim((string)$display_bio))): ?>
+                            <p class="profile-bio"><?= nl2br(htmlspecialchars((string)$display_bio, ENT_QUOTES, 'UTF-8'), false) ?></p>
+                        <?php endif; ?>
+                    </article>
                 <?php endforeach; ?>
             </div>
+
+            <?php if ($total_pages > 1): ?>
+                <nav class="pagination" aria-label="Pagination">
+                    <?php if ($page > 1): ?>
+                        <a href="public_profiles.php?page=<?= $page - 1 ?>" class="btn btn-sm btn-secondary">&larr; <?= htmlspecialchars(__('page_prev'), ENT_QUOTES, 'UTF-8') ?></a>
+                    <?php endif; ?>
+                    <span class="text-muted"><?= htmlspecialchars(__('page_of', ['page' => $page, 'total' => $total_pages]), ENT_QUOTES, 'UTF-8') ?></span>
+                    <?php if ($page < $total_pages): ?>
+                        <a href="public_profiles.php?page=<?= $page + 1 ?>" class="btn btn-sm btn-secondary"><?= htmlspecialchars(__('page_next'), ENT_QUOTES, 'UTF-8') ?> &rarr;</a>
+                    <?php endif; ?>
+                </nav>
+            <?php endif; ?>
         <?php endif; ?>
-    </div>
-    <?php include "includes/footer.php"; ?>
-    <script src="assets/js/main.js"></script>
+    </main>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
+    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="assets/js/main.js"></script>
 </body>
 </html>

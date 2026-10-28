@@ -1,80 +1,74 @@
 <?php
-session_start();
-require_once 'includes/db.php';
+require_once __DIR__ . '/includes/db.php';
 
-if (!isset($_SESSION['user_id'])) {
+require_db($pdo);
+
+if (empty($_SESSION['user_id'])) {
     header('Location: login.php');
-    exit();
+    exit;
 }
 
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-
-$user_id = $_SESSION['user_id'];
+$user_id = (int)$_SESSION['user_id'];
 $success = '';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $new_username = trim($_POST['new_username'] ?? '');
-    $csrf_token = $_POST['csrf_token'] ?? '';
+    $new_username = trim((string)($_POST['new_username'] ?? ''));
 
-    if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrf_token)) {
-        $error = "Invalid CSRF token.";
-    } elseif (empty($new_username)) {
-        $error = "Please enter a new username.";
-    } elseif (strlen($new_username) < 3) {
-        $error = "Username must be at least 3 characters long.";
+    if (!verify_csrf()) {
+        $error = __('csrf_error');
+    } elseif ($new_username === '') {
+        $error = __('fill_all_fields');
+    } elseif (!validate_username_format($new_username)) {
+        $error = __('invalid_username');
     } else {
         $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? AND id != ?");
         $stmt->execute([$new_username, $user_id]);
 
         if ($stmt->fetch()) {
-            $error = "Username is already taken.";
+            $error = __('username_taken');
         } else {
             $update_stmt = $pdo->prepare("UPDATE users SET username = ? WHERE id = ?");
             if ($update_stmt->execute([$new_username, $user_id])) {
                 $_SESSION['username'] = $new_username;
-                $success = "Username changed successfully.";
+                $success = __('username_changed_success');
             } else {
-                $error = "Failed to update username. Please try again.";
+                $error = __('generic_error');
             }
         }
     }
 }
+
+$page_title = __('change_username') . ' - ' . $t_site_title;
+$robots_meta = 'noindex';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(current_lang(), ENT_QUOTES, 'UTF-8') ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Change Username - <?= htmlspecialchars($t_site_title) ?></title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <?php include __DIR__ . '/includes/head.php'; ?>
 </head>
 <body>
-    <?php include 'includes/header.php'; ?>
-    <div class="container main-content">
-        <h2>Change Username</h2>
-        <a href="<?= $_SESSION['role'] === 'admin' ? 'admin/index.php' : 'profile.php' ?>" class="btn btn-sm" style="margin-bottom: 20px;">&larr; Back</a>
+    <?php include __DIR__ . '/includes/header.php'; ?>
+    <main id="main-content" class="container main-content">
+        <h1><?= htmlspecialchars(__('change_username'), ENT_QUOTES, 'UTF-8') ?></h1>
+        <p><a href="<?= ($_SESSION['role'] ?? '') === 'admin' ? 'admin/index.php' : 'profile.php' ?>" class="btn btn-sm btn-secondary">&larr; <?= htmlspecialchars(__('back'), ENT_QUOTES, 'UTF-8') ?></a></p>
 
-        <?php if ($error): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
-        <?php if ($success): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
+        <div class="auth-links">
+            <?php if ($error): ?><p class="error" role="alert"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
+            <?php if ($success): ?><p class="success" role="status"><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
+        </div>
 
-        <form method="POST" action="" class="auth-form">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+        <form method="POST" action="change_username.php" class="auth-form">
+            <?= csrf_field() ?>
             <div class="form-group">
-                <label for="new_username">New Username</label>
-                <input type="text" id="new_username" name="new_username" value="<?= htmlspecialchars($_SESSION['username']) ?>" required>
+                <label for="new_username"><?= htmlspecialchars(__('new_username_label'), ENT_QUOTES, 'UTF-8') ?></label>
+                <input type="text" id="new_username" name="new_username" minlength="3" maxlength="50" autocomplete="username" autocorrect="off" autocapitalize="off" spellcheck="false" aria-describedby="user-hint" value="<?= htmlspecialchars((string)$_SESSION['username'], ENT_QUOTES, 'UTF-8') ?>" required>
+                <span id="user-hint" class="field-hint"><?= htmlspecialchars(__('username_hint'), ENT_QUOTES, 'UTF-8') ?></span>
             </div>
-            <button type="submit" class="btn">Change Username</button>
+            <button type="submit" class="btn" style="width: 100%;"><?= htmlspecialchars(__('change_username'), ENT_QUOTES, 'UTF-8') ?></button>
         </form>
-    </div>
-    <?php include "includes/footer.php"; ?>
-    <script src="assets/js/main.js"></script>
+    </main>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
+    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="assets/js/main.js"></script>
 </body>
 </html>

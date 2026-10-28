@@ -1,59 +1,86 @@
 <?php
-session_start();
-require_once 'includes/db.php';
+require_once __DIR__ . '/includes/db.php';
 
+$per_page = 10;
+$page = max(1, (int)($_GET['page'] ?? 1));
+$total_ideas = 0;
+$total_pages = 1;
 $ideas = [];
-if ($pdo) {
-    $ideas = $pdo->query("
+
+if ($pdo instanceof PDO) {
+    $total_ideas = (int)$pdo->query("SELECT COUNT(*) FROM ideas WHERE status = 'approved'")->fetchColumn();
+    $total_pages = max(1, (int)ceil($total_ideas / $per_page));
+    if ($page > $total_pages) {
+        $page = $total_pages;
+    }
+    $offset = ($page - 1) * $per_page;
+
+    $stmt = $pdo->prepare("
         SELECT i.title, i.description, u.username, i.created_at
         FROM ideas i
         JOIN users u ON i.user_id = u.id
         WHERE i.status = 'approved'
         ORDER BY i.created_at DESC
-    ")->fetchAll();
+        LIMIT ? OFFSET ?
+    ");
+    $stmt->bindValue(1, $per_page, PDO::PARAM_INT);
+    $stmt->bindValue(2, $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    $ideas = $stmt->fetchAll();
 }
+
+$page_title = $t_ideas_page_title . ' - ' . $t_site_title;
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(current_lang(), ENT_QUOTES, 'UTF-8') ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($t_ideas_page_title) ?> - <?= htmlspecialchars($t_site_title) ?></title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <?php include __DIR__ . '/includes/head.php'; ?>
 </head>
 <body>
-    <?php include 'includes/header.php'; ?>
-    <div class="container main-content">
+    <?php include __DIR__ . '/includes/header.php'; ?>
+    <main id="main-content" class="container main-content">
         <div class="flex-header">
-            <h2><?= htmlspecialchars($t_ideas_page_title) ?></h2>
-            <?php if (isset($_SESSION['user_id']) && $_SESSION['status'] === 'approved'): ?>
-                <a href="submit_idea.php" class="btn"><?= htmlspecialchars($t_submit_idea_btn) ?></a>
+            <h1><?= htmlspecialchars($t_ideas_page_title, ENT_QUOTES, 'UTF-8') ?></h1>
+            <?php if (!empty($_SESSION['user_id']) && ($_SESSION['status'] ?? '') === 'approved'): ?>
+                <a href="submit_idea.php" class="btn"><?= htmlspecialchars($t_submit_idea_btn, ENT_QUOTES, 'UTF-8') ?></a>
             <?php endif; ?>
         </div>
 
-        <p><?= $t_ideas_page_text ?></p>
+        <div class="rich-text-content"><?= sanitize_rich_html($t_ideas_page_text) ?></div>
 
         <div class="ideas-list">
             <?php foreach ($ideas as $idea): ?>
-                <div class="idea-item">
-                    <h3><?= htmlspecialchars($idea['title']) ?></h3>
-                    <p class="idea-meta">By <strong><?= htmlspecialchars($idea['username']) ?></strong> on <?= date('M d, Y', strtotime($idea['created_at'])) ?></p>
+                <article class="idea-item">
+                    <h3><?= htmlspecialchars($idea['title'], ENT_QUOTES, 'UTF-8') ?></h3>
+                    <p class="idea-meta">
+                        <?= htmlspecialchars(__('by_author_on_date', [
+                            'author' => $idea['username'],
+                            'date' => format_date_localized($idea['created_at']),
+                        ]), ENT_QUOTES, 'UTF-8') ?>
+                    </p>
                     <div class="idea-desc">
-                        <?= nl2br(htmlspecialchars($idea['description'])) ?>
+                        <?= nl2br(htmlspecialchars($idea['description'], ENT_QUOTES, 'UTF-8'), false) ?>
                     </div>
-                </div>
+                </article>
             <?php endforeach; ?>
-            <?php if(empty($ideas)): ?>
-                <p>No ideas published yet.</p>
+            <?php if (empty($ideas)): ?>
+                <p><?= htmlspecialchars(__('no_ideas_yet'), ENT_QUOTES, 'UTF-8') ?></p>
             <?php endif; ?>
         </div>
-    </div>
-    <?php include "includes/footer.php"; ?>
-    <script src="assets/js/main.js"></script>
+
+        <?php if ($total_pages > 1): ?>
+            <nav class="pagination" aria-label="Pagination">
+                <?php if ($page > 1): ?>
+                    <a href="ideas.php?page=<?= $page - 1 ?>" class="btn btn-sm btn-secondary">&larr; <?= htmlspecialchars(__('page_prev'), ENT_QUOTES, 'UTF-8') ?></a>
+                <?php endif; ?>
+                <span class="text-muted"><?= htmlspecialchars(__('page_of', ['page' => $page, 'total' => $total_pages]), ENT_QUOTES, 'UTF-8') ?></span>
+                <?php if ($page < $total_pages): ?>
+                    <a href="ideas.php?page=<?= $page + 1 ?>" class="btn btn-sm btn-secondary"><?= htmlspecialchars(__('page_next'), ENT_QUOTES, 'UTF-8') ?> &rarr;</a>
+                <?php endif; ?>
+            </nav>
+        <?php endif; ?>
+    </main>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
+    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="assets/js/main.js"></script>
 </body>
 </html>

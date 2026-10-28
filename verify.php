@@ -1,61 +1,62 @@
 <?php
-session_start();
-require_once 'includes/db.php';
+require_once __DIR__ . '/includes/db.php';
+
+require_db($pdo);
 
 $error = '';
 $success = '';
 
-if (isset($_GET['token'])) {
-    $token = $_GET['token'];
-
-    $stmt = $pdo->prepare("SELECT id FROM users WHERE verify_token = ? AND email_verified = 0");
+$token = trim((string)($_GET['token'] ?? ''));
+if ($token !== '' && strlen($token) <= 128) {
+    $stmt = $pdo->prepare("SELECT id, verify_expires_at FROM users WHERE verify_token = ? AND email_verified = 0");
     $stmt->execute([$token]);
-    $user = $stmt->fetch();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user) {
-        $updateStmt = $pdo->prepare("UPDATE users SET email_verified = 1, verify_token = NULL WHERE id = ?");
-        if ($updateStmt->execute([$user['id']])) {
-            $success = "Your email has been successfully verified! You can now wait for admin approval and login.";
+        $expired = !empty($user['verify_expires_at']) && strtotime((string)$user['verify_expires_at']) < time();
+        if ($expired) {
+            $error = __('verify_invalid');
         } else {
-            $error = "Something went wrong during verification. Please try again.";
+            $updateStmt = $pdo->prepare("UPDATE users SET email_verified = 1, verify_token = NULL, verify_expires_at = NULL WHERE id = ?");
+            if ($updateStmt->execute([(int)$user['id']])) {
+                $success = __('verify_success');
+            } else {
+                $error = __('generic_error');
+            }
         }
     } else {
-        $error = "Invalid or expired verification token. Your email might already be verified.";
+        $error = __('verify_invalid');
     }
 } else {
-    $error = "No verification token provided.";
+    $error = __('verify_missing');
 }
+
+$page_title = __('verify_title') . ' - ' . $t_site_title;
+$robots_meta = 'noindex';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(current_lang(), ENT_QUOTES, 'UTF-8') ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Email - <?= htmlspecialchars($t_site_title) ?></title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <?php include __DIR__ . '/includes/head.php'; ?>
 </head>
 <body>
-    <?php include 'includes/header.php'; ?>
-    <div class="container main-content">
-        <h2>Email Verification</h2>
+    <?php include __DIR__ . '/includes/header.php'; ?>
+    <main id="main-content" class="container main-content">
+        <h1><?= htmlspecialchars(__('verify_title'), ENT_QUOTES, 'UTF-8') ?></h1>
         <?php if ($error): ?>
-            <div class="status-box status-pending">
-                <p class="error"><?= htmlspecialchars($error) ?></p>
+            <div class="status-box status-pending" role="alert">
+                <p><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
+                <p><a href="resend_verification.php" class="btn btn-sm"><?= htmlspecialchars(__('resend_btn'), ENT_QUOTES, 'UTF-8') ?></a></p>
             </div>
         <?php endif; ?>
         <?php if ($success): ?>
-            <div class="status-box status-approved">
-                <p class="success"><?= htmlspecialchars($success) ?></p>
-                <p><a href="login.php" class="btn">Go to Login</a></p>
+            <div class="status-box status-approved" role="status">
+                <p><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></p>
+                <p><a href="login.php" class="btn"><?= htmlspecialchars(__('go_to_login'), ENT_QUOTES, 'UTF-8') ?></a></p>
             </div>
         <?php endif; ?>
-    </div>
-    <?php include "includes/footer.php"; ?>
-    <script src="assets/js/main.js"></script>
+    </main>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
+    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="assets/js/main.js"></script>
 </body>
 </html>

@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /includes/
+Disallow: /vendor/
+Disallow: /verify.php
+Disallow: /reset_password.php
+Disallow: /forgot_password.php
+Disallow: /resend_verification.php
+Disallow: /profile.php
+Disallow: /change_password.php
+Disallow: /change_username.php
+Disallow: /change_email.php
+Disallow: /delete_account.php
+Disallow: /submit_idea.php
+
+Sitemap: /sitemap.xml

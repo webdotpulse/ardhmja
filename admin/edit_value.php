@@ -1,86 +1,98 @@
 <?php
-require_once '../includes/db.php';
-require_once 'admin_auth.php';
+require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/admin_auth.php';
 
-if (!isset($_GET['id'])) {
+$value_id = (int)($_GET['id'] ?? 0);
+if ($value_id <= 0) {
     header('Location: core_values.php');
-    exit();
+    exit;
 }
 
-$value_id = $_GET['id'];
-
-// Handle form submission
 $success = '';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title = trim($_POST['title']);
-    $description = trim($_POST['description']);
-
-    if (empty($title)) {
-        $error = "Title cannot be empty.";
+    if (!verify_csrf()) {
+        $error = __('csrf_error');
     } else {
-        $stmt = $pdo->prepare("UPDATE core_values SET title = ?, description = ? WHERE id = ?");
-        if ($stmt->execute([$title, $description, $value_id])) {
-            $success = "Core value updated successfully.";
+        $title = trim((string)($_POST['title'] ?? ''));
+        $title_sq = trim((string)($_POST['title_sq'] ?? ''));
+        $description = trim((string)($_POST['description'] ?? ''));
+        $description_sq = trim((string)($_POST['description_sq'] ?? ''));
+
+        if ($title === '' && $title_sq !== '') {
+            $title = $title_sq;
+        }
+
+        if ($title === '') {
+            $error = 'Title cannot be empty.';
         } else {
-            $error = "Failed to update core value.";
+            $stmt = $pdo->prepare("UPDATE core_values SET title = ?, title_sq = ?, description = ?, description_sq = ? WHERE id = ?");
+            if ($stmt->execute([
+                $title,
+                $title_sq !== '' ? $title_sq : null,
+                $description,
+                $description_sq !== '' ? $description_sq : null,
+                $value_id,
+            ])) {
+                $success = 'Core value updated successfully.';
+            } else {
+                $error = 'Failed to update core value.';
+            }
         }
     }
 }
 
-// Fetch value data
 $stmt = $pdo->prepare("SELECT * FROM core_values WHERE id = ?");
 $stmt->execute([$value_id]);
-$value = $stmt->fetch();
+$value = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$value) {
     header('Location: core_values.php');
-    exit();
+    exit;
 }
+
+$page_title = 'Edit Core Value - ' . $t_site_title;
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(current_lang(), ENT_QUOTES, 'UTF-8') ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Core Value</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <style>
-        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
-        .admin-wrapper { display: flex; flex: 1; }
-        .admin-content { flex: 1; padding: 20px; }
-        .edit-form { max-width: 500px; background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #ddd;}
-        .edit-form label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .edit-form input[type="text"], .edit-form textarea { width: 100%; margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-    </style>
-    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
+    <?php include __DIR__ . '/../includes/head.php'; ?>
 </head>
 <body>
     <div class="admin-wrapper">
-    <?php include 'admin_sidebar.php'; ?>
-    <div class="admin-content">
-        <h1>Edit Core Value</h1>
-        <a href="core_values.php" class="btn btn-sm" style="margin-bottom: 20px;">&larr; Back to Core Values</a>
+        <?php include __DIR__ . '/admin_sidebar.php'; ?>
+        <main id="main-content" class="admin-content">
+            <h1>Edit Core Value</h1>
+            <p><a href="core_values.php" class="btn btn-sm btn-secondary">&larr; Back to Core Values</a></p>
 
-        <?php if ($error): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
-        <?php if ($success): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
+            <?php if ($error): ?><p class="error" role="alert"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
+            <?php if ($success): ?><p class="success" role="status"><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
 
-        <form method="POST" class="edit-form">
-            <div class="form-group">
-                <label>Title</label>
-                <input type="text" name="title" value="<?= htmlspecialchars($value['title']) ?>" required>
-            </div>
-            <div class="form-group">
-                <label>Description</label>
-                <textarea name="description" rows="5"><?= htmlspecialchars($value['description']) ?></textarea>
-            </div>
+            <form method="POST" action="edit_value.php?id=<?= $value_id ?>" class="auth-form form-wide">
+                <?= csrf_field() ?>
+                <div class="form-group">
+                    <label for="title_en">Title — English</label>
+                    <input type="text" id="title_en" name="title" maxlength="255" value="<?= htmlspecialchars((string)$value['title'], ENT_QUOTES, 'UTF-8') ?>" required>
+                </div>
+                <div class="form-group">
+                    <label for="title_sq">Title — Albanian / Shqip (optional)</label>
+                    <input type="text" id="title_sq" name="title_sq" maxlength="255" value="<?= htmlspecialchars((string)($value['title_sq'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                </div>
+                <div class="form-group">
+                    <label for="desc_en">Description — English</label>
+                    <textarea id="desc_en" name="description" rows="5"><?= htmlspecialchars((string)($value['description'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="desc_sq">Description — Albanian / Shqip (optional)</label>
+                    <textarea id="desc_sq" name="description_sq" rows="5"><?= htmlspecialchars((string)($value['description_sq'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                </div>
 
-            <button type="submit" class="btn">Save Changes</button>
-        </form>
+                <button type="submit" class="btn">Save Changes</button>
+            </form>
+        </main>
     </div>
-    </div>
-    <?php include "../includes/footer.php"; ?>
-    <script src="../assets/js/main.js"></script>
+    <?php include __DIR__ . '/../includes/footer.php'; ?>
+    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="../assets/js/main.js"></script>
 </body>
 </html>

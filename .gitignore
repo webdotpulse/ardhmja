@@ -1,2 +1,7 @@
 node_modules/
 server.log
+includes/config.local.php
+uploads/*
+!uploads/.htaccess
+.env
+.env.*

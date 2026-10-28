@@ -1,9 +1,8 @@
 <?php
-session_start();
-require_once 'includes/db.php';
+require_once __DIR__ . '/includes/db.php';
 
-if ($pdo) {
-    // Get latest public ideas
+$latest_ideas = [];
+if ($pdo instanceof PDO) {
     $latest_ideas = $pdo->query("
         SELECT i.title, u.username, i.created_at
         FROM ideas i
@@ -12,64 +11,63 @@ if ($pdo) {
         ORDER BY i.created_at DESC
         LIMIT 3
     ")->fetchAll();
-} else {
-    $latest_ideas = [];
 }
 
+$page_title = $t_site_title . ' - ' . $t_menu_home;
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(current_lang(), ENT_QUOTES, 'UTF-8') ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($t_site_title) ?> - Home</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <?php include __DIR__ . '/includes/head.php'; ?>
+    <link rel="preload" as="image" href="assets/images/hero-bg-1x.webp" type="image/webp">
 </head>
 <body>
-    <?php include 'includes/header.php'; ?>
+    <?php include __DIR__ . '/includes/header.php'; ?>
 
-    <div class="hero-banner">
+    <section class="hero-banner">
         <div class="container hero-content">
-            <h2><?= htmlspecialchars($t_home_banner_text) ?></h2>
-            <p><?= $t_site_description ?></p>
-            <?php if (!isset($_SESSION['user_id'])): ?>
-                <a href="register.php" class="btn btn-large"><?= htmlspecialchars($t_join_us_btn) ?></a>
+            <h1><?= htmlspecialchars($t_home_banner_text, ENT_QUOTES, 'UTF-8') ?></h1>
+            <div class="hero-subtext"><?= sanitize_rich_html($t_site_description) ?></div>
+            <?php if (empty($_SESSION['user_id'])): ?>
+                <a href="register.php" class="btn btn-large"><?= htmlspecialchars($t_join_us_btn, ENT_QUOTES, 'UTF-8') ?></a>
             <?php endif; ?>
         </div>
-    </div>
+    </section>
 
-    <div class="container main-content">
+    <main id="main-content" class="container main-content">
         <div class="split-section">
             <div class="half-section">
-                <h3><?= htmlspecialchars($t_home_core_values_title) ?></h3>
-                <p><?= $t_home_core_values_text ?></p>
-                <a href="core_values.php" class="btn"><?= htmlspecialchars($t_view_values_btn) ?></a>
+                <h2><?= htmlspecialchars($t_home_core_values_title, ENT_QUOTES, 'UTF-8') ?></h2>
+                <div class="rich-text-content"><?= sanitize_rich_html($t_home_core_values_text) ?></div>
+                <a href="core_values.php" class="btn"><?= htmlspecialchars($t_view_values_btn, ENT_QUOTES, 'UTF-8') ?></a>
             </div>
             <div class="half-section">
-                <h3><?= htmlspecialchars($t_home_latest_ideas_title) ?></h3>
+                <h2><?= htmlspecialchars($t_home_latest_ideas_title, ENT_QUOTES, 'UTF-8') ?></h2>
                 <?php if (empty($latest_ideas)): ?>
-                    <p>No ideas published yet.</p>
+                    <p><?= htmlspecialchars(__('no_ideas_yet'), ENT_QUOTES, 'UTF-8') ?></p>
                 <?php else: ?>
                     <ul class="home-ideas-list">
                         <?php foreach ($latest_ideas as $idea): ?>
                             <li>
-                                <strong><?= htmlspecialchars($idea['title']) ?></strong>
-                                <div><small>By <?= htmlspecialchars($idea['username']) ?> on <?= date('M d, Y', strtotime($idea['created_at'])) ?></small></div>
+                                <strong><?= htmlspecialchars($idea['title'], ENT_QUOTES, 'UTF-8') ?></strong>
+                                <div>
+                                    <small class="text-muted">
+                                        <?= htmlspecialchars(__('by_author_on_date', [
+                                            'author' => $idea['username'],
+                                            'date' => format_date_localized($idea['created_at']),
+                                        ]), ENT_QUOTES, 'UTF-8') ?>
+                                    </small>
+                                </div>
                             </li>
                         <?php endforeach; ?>
                     </ul>
-                    <a href="ideas.php" class="btn"><?= htmlspecialchars($t_view_ideas_btn) ?></a>
+                    <a href="ideas.php" class="btn"><?= htmlspecialchars($t_view_ideas_btn, ENT_QUOTES, 'UTF-8') ?></a>
                 <?php endif; ?>
             </div>
         </div>
-    </div>
+    </main>
 
-    <?php include "includes/footer.php"; ?>
-    <script src="assets/js/main.js"></script>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
+    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="assets/js/main.js"></script>
 </body>
 </html>

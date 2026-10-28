@@ -1,88 +1,101 @@
 <?php
-require_once '../includes/db.php';
-require_once 'admin_auth.php';
+require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/admin_auth.php';
+
+$error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['message_id'])) {
-    if ($_POST['action'] === 'delete') {
-        if ($pdo) {
-            $stmt = $pdo->prepare("DELETE FROM messages WHERE id = ?");
-            $stmt->execute([$_POST['message_id']]);
-        }
+    if (!verify_csrf()) {
+        $error = __('csrf_error');
+    } elseif ($_POST['action'] === 'delete') {
+        $stmt = $pdo->prepare("DELETE FROM messages WHERE id = ?");
+        $stmt->execute([(int)$_POST['message_id']]);
+        header('Location: messages.php');
+        exit;
     }
-    header('Location: messages.php');
-    exit;
 }
 
-$messages = [];
-if ($pdo) {
-    $messages = $pdo->query("SELECT * FROM messages ORDER BY created_at DESC")->fetchAll();
-} else {
-    // Mock data for test environment
-    $messages = [
-        ['id' => 1, 'name' => 'Alice Johnson', 'email' => 'alice@example.com', 'message' => 'I would love to learn more about volunteering opportunities in Tirana.', 'created_at' => date('Y-m-d H:i:s')],
-        ['id' => 2, 'name' => 'Bob Williams', 'email' => 'bob@example.com', 'message' => 'The Green Energy Initiative is exactly what we need. How can I contribute?', 'created_at' => date('Y-m-d H:i:s')]
-    ];
+$per_page = 20;
+$page = max(1, (int)($_GET['page'] ?? 1));
+$total_messages = (int)$pdo->query("SELECT COUNT(*) FROM messages")->fetchColumn();
+$total_pages = max(1, (int)ceil($total_messages / $per_page));
+if ($page > $total_pages) {
+    $page = $total_pages;
 }
+$offset = ($page - 1) * $per_page;
 
+$stmt = $pdo->prepare("SELECT * FROM messages ORDER BY created_at DESC LIMIT ? OFFSET ?");
+$stmt->bindValue(1, $per_page, PDO::PARAM_INT);
+$stmt->bindValue(2, $offset, PDO::PARAM_INT);
+$stmt->execute();
+$messages = $stmt->fetchAll();
+
+$page_title = 'Contact Messages - ' . $t_site_title;
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(current_lang(), ENT_QUOTES, 'UTF-8') ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Messages</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <style>
-        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
-        .admin-wrapper { display: flex; flex: 1; }
-        .admin-content { flex: 1; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-        th { background: #f4f4f4; }
-        .message-content { white-space: pre-wrap; word-break: break-word; }
-    </style>
-    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
+    <?php include __DIR__ . '/../includes/head.php'; ?>
 </head>
 <body>
     <div class="admin-wrapper">
-    <?php include 'admin_sidebar.php'; ?>
-    <div class="admin-content">
-        <h1>Contact Messages</h1>
+        <?php include __DIR__ . '/admin_sidebar.php'; ?>
+        <main id="main-content" class="admin-content">
+            <h1>Contact Messages</h1>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Message</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($messages as $m): ?>
-                <tr>
-                    <td><?= $m['created_at'] ?></td>
-                    <td><?= htmlspecialchars($m['name']) ?></td>
-                    <td><a href="mailto:<?= htmlspecialchars($m['email']) ?>"><?= htmlspecialchars($m['email']) ?></a></td>
-                    <td class="message-content"><?= htmlspecialchars($m['message']) ?></td>
-                    <td>
-                        <form method="POST" style="display:inline;">
-                            <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="message_id" value="<?= $m['id'] ?>">
-                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-                <?php if(empty($messages)): ?>
-                <tr><td colspan="5">No messages found.</td></tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+            <?php if ($error): ?>
+                <p class="error" role="alert"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
+            <?php endif; ?>
+
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Message</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($messages as $m): ?>
+                        <tr>
+                            <td><?= htmlspecialchars(format_date_localized($m['created_at'], 'en'), ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars($m['name'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><a href="mailto:<?= htmlspecialchars($m['email'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($m['email'], ENT_QUOTES, 'UTF-8') ?></a></td>
+                            <td style="white-space: pre-wrap; word-break: break-word; max-width: 520px;"><?= htmlspecialchars($m['message'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td>
+                                <form method="POST" action="messages.php" style="display:inline;">
+                                    <?= csrf_field() ?>
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="message_id" value="<?= (int)$m['id'] ?>">
+                                    <button type="submit" class="btn btn-sm btn-danger" data-confirm="Delete this message permanently?">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                        <?php if (empty($messages)): ?>
+                        <tr><td colspan="5">No contact messages received yet.</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <?php if ($total_pages > 1): ?>
+                <nav class="pagination" aria-label="Pagination">
+                    <?php if ($page > 1): ?>
+                        <a href="messages.php?page=<?= $page - 1 ?>" class="btn btn-sm btn-secondary">&larr; Previous</a>
+                    <?php endif; ?>
+                    <span class="text-muted">Page <?= $page ?> of <?= $total_pages ?></span>
+                    <?php if ($page < $total_pages): ?>
+                        <a href="messages.php?page=<?= $page + 1 ?>" class="btn btn-sm btn-secondary">Next &rarr;</a>
+                    <?php endif; ?>
+                </nav>
+            <?php endif; ?>
+        </main>
     </div>
-    </div>
-    <?php include "../includes/footer.php"; ?>
-    <script src="../assets/js/main.js"></script>
+    <?php include __DIR__ . '/../includes/footer.php'; ?>
+    <script nonce="<?= htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8') ?>" src="../assets/js/main.js"></script>
 </body>
 </html>
