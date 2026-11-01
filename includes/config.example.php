@@ -7,7 +7,7 @@
  * overwrite your live database or SMTP settings.
  */
 
-// Canonical public URL of the website (no trailing slash), e.g. 'https://asamblejakombetare.al'
+// Canonical public URL of the website (no trailing slash), e.g. 'https://asamblejakombetare.com'
 define('APP_URL', 'https://yourdomain.com');
 
 // Database credentials (from Combell Control Panel -> MySQL Databases)

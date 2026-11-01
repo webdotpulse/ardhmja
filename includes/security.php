@@ -218,6 +218,50 @@ function app_base_url(): string {
     return $scheme . '://' . $raw_host . $script_dir;
 }
 
+function seo_base_url(): string {
+    $forwarded_host = trim(explode(',', (string)($_SERVER['HTTP_X_FORWARDED_HOST'] ?? ''))[0]);
+    $http_host = trim((string)($_SERVER['HTTP_HOST'] ?? ''));
+    $candidate_host = $forwarded_host !== '' ? $forwarded_host : $http_host;
+
+    $has_app_url = defined('APP_URL') && APP_URL !== '' && APP_URL !== 'https://yourdomain.com';
+
+    if ($candidate_host !== '' && preg_match('/^[a-zA-Z0-9.-]+(?::[0-9]{1,5})?$/', $candidate_host)) {
+        $candidate_hostname = strtolower((string)preg_replace('/:[0-9]+$/', '', $candidate_host));
+        $is_local = ($candidate_hostname === 'localhost' || $candidate_hostname === '127.0.0.1');
+
+        if ($has_app_url) {
+            $configured_host = strtolower((string)parse_url(APP_URL, PHP_URL_HOST));
+            $configured_apex = preg_replace('/^www\./i', '', $configured_host);
+            $candidate_apex = preg_replace('/^www\./i', '', $candidate_hostname);
+
+            if ($configured_apex !== '' && $candidate_apex === $configured_apex) {
+                $configured_path = rtrim((string)(parse_url(APP_URL, PHP_URL_PATH) ?? ''), '/');
+                $scheme = ($is_local && !is_https_request()) ? 'http' : 'https';
+                return $scheme . '://' . strtolower($candidate_host) . $configured_path;
+            }
+            return rtrim(APP_URL, '/');
+        }
+
+        $scheme = ($is_local && !is_https_request()) ? 'http' : 'https';
+        $script_dir = str_replace('\\', '/', dirname((string)($_SERVER['SCRIPT_NAME'] ?? '/index.php')));
+        if (preg_match('#/admin$#', $script_dir)) {
+            $script_dir = dirname($script_dir);
+        }
+        $script_dir = rtrim($script_dir, '/');
+        if ($script_dir === '.' || $script_dir === '/') {
+            $script_dir = '';
+        }
+
+        return $scheme . '://' . strtolower($candidate_host) . $script_dir;
+    }
+
+    if ($has_app_url) {
+        return rtrim(APP_URL, '/');
+    }
+
+    return 'https://asamblejakombetare.com';
+}
+
 function sanitize_rich_html(?string $html): string {
     $html = trim((string)$html);
     if ($html === '') {

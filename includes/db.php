@@ -34,8 +34,19 @@ require_once __DIR__ . '/security.php';
 require_once __DIR__ . '/i18n.php';
 require_once __DIR__ . '/migrations.php';
 
-init_session_and_headers();
-$app_lang = current_lang();
+$is_stateless_request = defined('AK_STATELESS_REQUEST') && AK_STATELESS_REQUEST === true;
+
+if ($is_stateless_request) {
+    $debug = defined('APP_DEBUG') && APP_DEBUG === true;
+    if (!$debug) {
+        ini_set('display_errors', '0');
+        ini_set('display_startup_errors', '0');
+        ini_set('log_errors', '1');
+    }
+} else {
+    init_session_and_headers();
+    $app_lang = current_lang();
+}
 
 if (!isset($pdo)) {
     try {
@@ -53,6 +64,10 @@ if (!isset($pdo)) {
         error_log('Database connection failed: ' . $e->getMessage());
         $pdo = null;
     }
+}
+
+if ($is_stateless_request) {
+    return;
 }
 
 // Fetch global settings & run one-time non-destructive migration if needed
@@ -152,6 +167,7 @@ function require_db(?PDO $pdo, string $asset_prefix = ''): void {
            $t_menu_profiles, $t_menu_contact, $t_menu_profile, $t_menu_admin,
            $t_menu_logout, $t_menu_login, $t_menu_register;
     $page_title = __('db_unavailable_title') . ' - ' . ($t_site_title ?? 'AsamblejaKombetare');
+    $robots_meta = 'noindex';
     ?>
     <!DOCTYPE html>
     <html lang="<?= htmlspecialchars(current_lang(), ENT_QUOTES, 'UTF-8') ?>">
